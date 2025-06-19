@@ -154,3 +154,14 @@ export interface PlayerTradedData {
   commodity: Commodity;
   quantity: number;
 }
+
+export interface ShipUpgradeData {
+  shipType: ShipType;
+}
+
+export interface ShipUpgradeResultData {
+  success: boolean;
+  newShip: ShipType;
+  player: Player;
+  message?: string;
+}

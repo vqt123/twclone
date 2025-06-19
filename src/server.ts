@@ -11,7 +11,11 @@ import {
   PlayerUpdateData,
   TradeData,
   TradeResultData,
-  PlayerTradedData
+  PlayerTradedData,
+  ShipUpgradeData,
+  ShipUpgradeResultData,
+  ShipType,
+  PortType
 } from './types';
 import { commodities, shipTypes } from './game-config';
 import { generateSectors, generatePorts } from './universe-generator';
@@ -177,6 +181,64 @@ io.on('connection', (socket) => {
       commodity: data.commodity,
       quantity: quantity
     } as PlayerTradedData);
+  });
+
+  socket.on('upgradeShip', (data: ShipUpgradeData) => {
+    const player = Object.values(gameState.players).find(p => p.socketId === socket.id)!;
+    const currentSector = gameState.sectors[player.currentSector];
+    
+    // Check if player is at a StarPort
+    if (!currentSector.port || currentSector.port.type !== PortType.STARPORT) {
+      socket.emit('error', 'Ship upgrades only available at StarPorts');
+      return;
+    }
+    
+    // Check if ship type is valid
+    if (!gameState.shipTypes[data.shipType]) {
+      socket.emit('error', 'Invalid ship type');
+      return;
+    }
+    
+    const newShipInfo = gameState.shipTypes[data.shipType];
+    
+    // Check if player already has this ship
+    if (player.ship === data.shipType) {
+      socket.emit('error', 'You already have this ship');
+      return;
+    }
+    
+    // Check if player can afford the ship
+    if (player.credits < newShipInfo.price) {
+      socket.emit('error', 'Insufficient credits for ship upgrade');
+      return;
+    }
+    
+    // Check if cargo fits in new ship (prevent losing items)
+    if (player.cargoUsed > newShipInfo.cargoCapacity) {
+      socket.emit('error', 'Cannot downgrade - cargo exceeds new ship capacity');
+      return;
+    }
+    
+    // Perform the upgrade
+    player.credits -= newShipInfo.price;
+    player.ship = data.shipType;
+    player.cargoCapacity = newShipInfo.cargoCapacity;
+    
+    socket.emit('shipUpgradeResult', {
+      success: true,
+      newShip: data.shipType,
+      player: player,
+      message: `Successfully upgraded to ${newShipInfo.name}!`
+    } as ShipUpgradeResultData);
+    
+    // Broadcast to other players in sector
+    socket.to(currentSector.id.toString()).emit('playerUpdate', {
+      type: PlayerUpdateType.MOVED,
+      player: player,
+      sectors: gameState.sectors
+    } as PlayerUpdateData);
+    
+    console.log(`Player ${player.name} upgraded to ${newShipInfo.name}`);
   });
   
   socket.on('disconnect', () => {

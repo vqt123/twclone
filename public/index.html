@@ -207,6 +207,78 @@
         .energy-fill.critical {
             background-color: #ff0000;
         }
+        
+        .ship-upgrade {
+            margin-top: 20px;
+            border: 1px solid #ffaa00;
+            padding: 10px;
+            background-color: #110800;
+        }
+        
+        .ship-upgrade h4 {
+            color: #ffaa00;
+            margin: 0 0 10px 0;
+        }
+        
+        .ship-upgrade-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .ship-option {
+            border: 1px solid #664400;
+            padding: 8px;
+            background-color: #221100;
+            position: relative;
+        }
+        
+        .ship-option.current {
+            border-color: #ffaa00;
+            background-color: #332200;
+        }
+        
+        .ship-option.affordable {
+            border-color: #00aa00;
+        }
+        
+        .ship-name {
+            font-weight: bold;
+            color: #ffaa00;
+        }
+        
+        .ship-stats {
+            font-size: 10px;
+            color: #aaa;
+            margin: 2px 0;
+        }
+        
+        .ship-price {
+            font-size: 11px;
+            color: #ffff00;
+        }
+        
+        .upgrade-button {
+            background-color: #443300;
+            color: #ffaa00;
+            border: 1px solid #ffaa00;
+            padding: 4px 8px;
+            margin-top: 5px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 10px;
+            width: 100%;
+        }
+        
+        .upgrade-button:hover {
+            background-color: #665500;
+        }
+        
+        .upgrade-button:disabled {
+            background-color: #222;
+            color: #666;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body>
@@ -262,6 +334,11 @@
                 <div id="portInfo" class="port-info" style="display: none;">
                     <h4 id="portName">-</h4>
                     <div id="tradeControls" class="trade-controls"></div>
+                </div>
+                
+                <div id="shipUpgrade" class="ship-upgrade" style="display: none;">
+                    <h4>Ship Upgrade Center</h4>
+                    <div id="shipUpgradeControls" class="ship-upgrade-controls"></div>
                 </div>
                 
                 <div class="players-list">
@@ -397,6 +474,9 @@
             // Update port info
             updatePortInfo(currentSector);
             
+            // Update ship upgrade info
+            updateShipUpgradeInfo(currentSector);
+            
             if (currentSector && currentSector.players && currentSector.players.length > 0) {
                 playersDiv.innerHTML = '';
                 currentSector.players.forEach(playerId => {
@@ -458,6 +538,56 @@
             socket.emit('sellItem', { commodity: commodity, quantity: 1 });
         }
 
+        function updateShipUpgradeInfo(sector) {
+            const shipUpgrade = document.getElementById('shipUpgrade');
+            const shipUpgradeControls = document.getElementById('shipUpgradeControls');
+            
+            // Only show ship upgrade at StarPorts
+            if (sector && sector.port && sector.port.type === 'starport') {
+                shipUpgrade.style.display = 'block';
+                shipUpgradeControls.innerHTML = '';
+                
+                Object.keys(gameState.shipTypes).forEach(shipType => {
+                    const shipInfo = gameState.shipTypes[shipType];
+                    const isCurrentShip = gameState.player.ship === shipType;
+                    const canAfford = gameState.player.credits >= shipInfo.price;
+                    
+                    const shipOption = document.createElement('div');
+                    shipOption.className = 'ship-option';
+                    
+                    if (isCurrentShip) {
+                        shipOption.classList.add('current');
+                    } else if (canAfford) {
+                        shipOption.classList.add('affordable');
+                    }
+                    
+                    let content = `
+                        <div class="ship-name">${shipInfo.name}</div>
+                        <div class="ship-stats">Cargo: ${shipInfo.cargoCapacity} units</div>
+                        <div class="ship-stats">Energy Efficiency: ${Math.round(shipInfo.energyEfficiency * 100)}%</div>
+                        <div class="ship-price">Price: ${shipInfo.price === 0 ? 'Free' : shipInfo.price + ' credits'}</div>
+                    `;
+                    
+                    if (isCurrentShip) {
+                        content += `<div style="color: #00ff00; font-size: 10px; margin-top: 5px;">CURRENT SHIP</div>`;
+                    } else if (shipInfo.price > 0) {
+                        const buttonDisabled = !canAfford ? 'disabled' : '';
+                        const buttonText = canAfford ? 'Upgrade Ship' : 'Insufficient Credits';
+                        content += `<button class="upgrade-button" onclick="upgradeShip('${shipType}')" ${buttonDisabled}>${buttonText}</button>`;
+                    }
+                    
+                    shipOption.innerHTML = content;
+                    shipUpgradeControls.appendChild(shipOption);
+                });
+            } else {
+                shipUpgrade.style.display = 'none';
+            }
+        }
+
+        function upgradeShip(shipType) {
+            socket.emit('upgradeShip', { shipType: shipType });
+        }
+
         // Socket event handlers
         socket.on('playerJoined', (data) => {
             gameState.player = data.player;
@@ -515,6 +645,14 @@
                 log(`Bought ${data.quantity} ${data.commodity} for ${data.totalCost} credits`);
             } else {
                 log(`Sold ${data.quantity} ${data.commodity} for ${data.totalEarned} credits`);
+            }
+        });
+
+        socket.on('shipUpgradeResult', (data) => {
+            if (data.success) {
+                gameState.player = data.player;
+                updatePlayerInfo();
+                log(data.message);
             }
         });
 
