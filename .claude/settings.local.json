@@ -16,7 +16,9 @@
       "Bash(npm install:*)",
       "Bash(railway login:*)",
       "Bash(gh:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(npm run dev:*)",
+      "Bash(curl:*)"
     ],
     "deny": []
   }
