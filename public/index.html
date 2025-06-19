@@ -328,32 +328,20 @@
                     <div>Credits: <span id="playerCredits">-</span></div>
                     <div>Ship: <span id="playerShip">-</span></div>
                     <div>Current Sector: <span id="currentSector">-</span></div>
-                    <div>Cargo: <span id="cargoUsed">-</span>/<span id="cargoCapacity">-</span></div>
                     <div>Energy: <span id="playerEnergy">-</span>/2400</div>
                     <div class="energy-bar">
                         <div class="energy-fill" id="energyFill" style="width: 100%;"></div>
                     </div>
                 </div>
                 
-                <div class="inventory">
-                    <h4>Inventory:</h4>
-                    <div class="inventory-item">
-                        <span>Ore:</span>
-                        <span id="inv-ore">0</span>
-                    </div>
-                    <div class="inventory-item">
-                        <span>Food:</span>
-                        <span id="inv-food">0</span>
-                    </div>
-                    <div class="inventory-item">
-                        <span>Equipment:</span>
-                        <span id="inv-equipment">0</span>
-                    </div>
-                </div>
                 
-                <div id="portInfo" class="port-info" style="display: none;">
-                    <h4 id="portName">-</h4>
-                    <div id="tradeControls" class="trade-controls"></div>
+                <div id="tradingPostInfo" class="port-info" style="display: none;">
+                    <h4 id="tradingPostName">-</h4>
+                    <div id="tradingPostDescription" style="font-size: 11px; color: #aaa; margin-bottom: 10px;"></div>
+                    <div>Efficiency: <span id="tradeEfficiency">100%</span></div>
+                    <div style="margin-top: 10px;">
+                        <button id="tradeButton" class="trade-button" onclick="executeTrade()">Execute Trade</button>
+                    </div>
                 </div>
                 
                 <div id="shipUpgrade" class="ship-upgrade" style="display: none;">
@@ -381,7 +369,7 @@
             player: null,
             sectors: {},
             players: {},
-            commodities: {},
+            tradingPosts: {},
             shipTypes: {}
         };
 
@@ -419,9 +407,11 @@
                 }
                 
                 const playerCount = sector.players ? sector.players.length : 0;
+                const tradingPostInfo = sector.tradingPost ? `<br><small style="color: #ffaa00;">Trading Post</small>` : '';
                 sectorDiv.innerHTML = `
                     <strong>${sector.name}</strong><br>
                     <small>Players: ${playerCount}</small>
+                    ${tradingPostInfo}
                 `;
                 
                 sectorDiv.addEventListener('click', () => {
@@ -474,8 +464,6 @@
             document.getElementById('playerName').textContent = gameState.player.name;
             document.getElementById('playerCredits').textContent = gameState.player.credits;
             document.getElementById('currentSector').textContent = gameState.player.currentSector;
-            document.getElementById('cargoUsed').textContent = gameState.player.cargoUsed || 0;
-            document.getElementById('cargoCapacity').textContent = gameState.player.cargoCapacity || 20;
             
             // Update ship and energy info
             if (gameState.player.ship && gameState.shipTypes) {
@@ -498,18 +486,12 @@
                 energyFill.classList.add('low');
             }
             
-            // Update inventory
-            if (gameState.player.inventory) {
-                document.getElementById('inv-ore').textContent = gameState.player.inventory.ore || 0;
-                document.getElementById('inv-food').textContent = gameState.player.inventory.food || 0;
-                document.getElementById('inv-equipment').textContent = gameState.player.inventory.equipment || 0;
-            }
             
             const currentSector = gameState.sectors[gameState.player.currentSector];
             const playersDiv = document.getElementById('playersInSector');
             
-            // Update port info
-            updatePortInfo(currentSector);
+            // Update trading post info
+            updateTradingPostInfo(currentSector);
             
             // Update ship upgrade info
             updateShipUpgradeInfo(currentSector);
@@ -530,49 +512,24 @@
             }
         }
 
-        function updatePortInfo(sector) {
-            const portInfo = document.getElementById('portInfo');
-            const portName = document.getElementById('portName');
-            const tradeControls = document.getElementById('tradeControls');
+        function updateTradingPostInfo(sector) {
+            const tradingPostInfo = document.getElementById('tradingPostInfo');
+            const tradingPostName = document.getElementById('tradingPostName');
+            const tradingPostDescription = document.getElementById('tradingPostDescription');
+            const tradeEfficiency = document.getElementById('tradeEfficiency');
             
-            if (sector && sector.port) {
-                portInfo.style.display = 'block';
-                portName.textContent = sector.port.name;
-                tradeControls.innerHTML = '';
-                
-                Object.keys(gameState.commodities).forEach(commodity => {
-                    const prices = sector.port.prices[commodity];
-                    if (prices.buy || prices.sell) {
-                        const tradeItem = document.createElement('div');
-                        tradeItem.className = 'trade-item';
-                        
-                        let content = `<strong>${gameState.commodities[commodity].name}</strong><br>`;
-                        
-                        if (prices.sell) {
-                            content += `<div class="price-display">Buy: ${prices.sell} credits</div>`;
-                            content += `<button class="trade-button" onclick="buyItem('${commodity}')">Buy 1</button>`;
-                        }
-                        
-                        if (prices.buy) {
-                            content += `<div class="price-display">Sell: ${prices.buy} credits</div>`;
-                            content += `<button class="trade-button" onclick="sellItem('${commodity}')">Sell 1</button>`;
-                        }
-                        
-                        tradeItem.innerHTML = content;
-                        tradeControls.appendChild(tradeItem);
-                    }
-                });
+            if (sector && sector.tradingPost) {
+                tradingPostInfo.style.display = 'block';
+                tradingPostName.textContent = sector.tradingPost.name;
+                tradingPostDescription.textContent = sector.tradingPost.description;
+                tradeEfficiency.textContent = Math.round(sector.tradingPost.tradeEfficiency * 100) + '%';
             } else {
-                portInfo.style.display = 'none';
+                tradingPostInfo.style.display = 'none';
             }
         }
 
-        function buyItem(commodity) {
-            socket.emit('buyItem', { commodity: commodity, quantity: 1 });
-        }
-
-        function sellItem(commodity) {
-            socket.emit('sellItem', { commodity: commodity, quantity: 1 });
+        function executeTrade() {
+            socket.emit('trade');
         }
 
         function updateShipUpgradeInfo(sector) {
@@ -580,7 +537,7 @@
             const shipUpgradeControls = document.getElementById('shipUpgradeControls');
             
             // Only show ship upgrade at StarPorts
-            if (sector && sector.port && sector.port.type === 'starport') {
+            if (sector && sector.tradingPost && sector.tradingPost.type === 'starport') {
                 shipUpgrade.style.display = 'block';
                 shipUpgradeControls.innerHTML = '';
                 
@@ -600,8 +557,8 @@
                     
                     let content = `
                         <div class="ship-name">${shipInfo.name}</div>
-                        <div class="ship-stats">Cargo: ${shipInfo.cargoCapacity} units</div>
                         <div class="ship-stats">Energy Efficiency: ${Math.round(shipInfo.energyEfficiency * 100)}%</div>
+                        <div class="ship-stats">Trade Multiplier: ${shipInfo.tradeMultiplier}x</div>
                         <div class="ship-price">Price: ${shipInfo.price === 0 ? 'Free' : shipInfo.price + ' credits'}</div>
                     `;
                     
@@ -707,7 +664,7 @@
             gameState.player = data.player;
             gameState.sectors = data.sectors;
             gameState.players[data.player.id] = data.player;
-            gameState.commodities = data.commodities || {};
+            gameState.tradingPosts = data.tradingPosts || {};
             gameState.shipTypes = data.shipTypes || {};
             
             log(`Welcome to TradeWars! You are ${data.player.name}`);
@@ -757,13 +714,16 @@
 
         socket.on('tradeResult', (data) => {
             gameState.player = data.player;
+            
+            // Update the sector's trading post efficiency
+            const currentSector = gameState.sectors[gameState.player.currentSector];
+            if (currentSector && currentSector.tradingPost) {
+                currentSector.tradingPost.tradeEfficiency = data.newEfficiency;
+            }
+            
             updatePlayerInfo();
             
-            if (data.type === 'buy') {
-                log(`Bought ${data.quantity} ${data.commodity} for ${data.totalCost} credits`);
-            } else {
-                log(`Sold ${data.quantity} ${data.commodity} for ${data.totalEarned} credits`);
-            }
+            log(`Trade executed at ${data.tradingPostName} for ${data.profit} credits (${Math.round(data.newEfficiency * 100)}% efficiency remaining)`);
         });
 
         socket.on('shipUpgradeResult', (data) => {
@@ -775,7 +735,7 @@
         });
 
         socket.on('playerTraded', (data) => {
-            log(`${data.playerName} ${data.type} ${data.quantity} ${data.commodity}`);
+            log(`${data.playerName} traded at ${data.tradingPostName} for ${data.profit} credits`);
         });
 
         // Auto-update energy display every 10 seconds

@@ -1,5 +1,5 @@
-import { Sector, Port, PortType } from './types';
-import { commodities, portTypes } from './game-config';
+import { Sector, TradingPost, TradingPostType } from './types';
+import { tradingPosts, tradeConfig } from './game-config';
 
 export function generateSectors(): { [key: number]: Sector } {
   const sectors: { [key: number]: Sector } = {};
@@ -23,7 +23,7 @@ export function generateSectors(): { [key: number]: Sector } {
         y: y,
         connections: connections,
         players: [],
-        port: null
+        tradingPost: null
       };
     }
   }
@@ -31,57 +31,61 @@ export function generateSectors(): { [key: number]: Sector } {
   return sectors;
 }
 
-export function generatePorts(sectors: { [key: number]: Sector }): void {
-  const portTypeKeys = Object.keys(portTypes) as PortType[];
+export function generateTradingPosts(sectors: { [key: number]: Sector }): void {
+  const tradingPostTypes = Object.keys(tradingPosts) as TradingPostType[];
   const sectorIds = Object.keys(sectors).map(Number);
   
-  const portSectors: number[] = [];
-  while (portSectors.length < 5) {
+  const tradingPostSectors: number[] = [];
+  while (tradingPostSectors.length < 5) {
     const randomSectorId = sectorIds[Math.floor(Math.random() * sectorIds.length)];
-    if (!portSectors.includes(randomSectorId)) {
-      portSectors.push(randomSectorId);
+    if (!tradingPostSectors.includes(randomSectorId)) {
+      tradingPostSectors.push(randomSectorId);
     }
   }
   
-  portSectors.forEach((sectorId, index) => {
-    const portType = portTypeKeys[index % portTypeKeys.length];
-    const portInfo = portTypes[portType];
+  tradingPostSectors.forEach((sectorId, index) => {
+    const postType = tradingPostTypes[index % tradingPostTypes.length];
+    const postInfo = tradingPosts[postType];
     
-    const port: Port = {
-      type: portType,
-      name: portInfo.name,
-      buys: portInfo.buys,
-      sells: portInfo.sells,
-      prices: {} as Port['prices']
+    const tradingPost: TradingPost = {
+      type: postType,
+      name: postInfo.name,
+      baseProfit: postInfo.baseProfit,
+      tradeEfficiency: 1.0, // Start at 100% efficiency
+      lastRegenTime: Date.now(),
+      description: postInfo.description
     };
     
-    Object.values(commodities).forEach((commodityInfo, commodityIndex) => {
-      const commodity = Object.keys(commodities)[commodityIndex] as keyof typeof commodities;
-      const basePrice = commodityInfo.basePrice;
-      
-      // NEW PROFITABLE PRICING SYSTEM
-      // Ports that SELL (player buys): 70-90% of base price (cheaper)
-      // Ports that BUY (player sells): 110-130% of base price (more expensive)
-      // This ensures 20-60% profit margins!
-      
-      const sellVariation = 0.2; // 70-90% for selling to player
-      const buyVariation = 0.2;  // 110-130% for buying from player
-      
-      const sellPrice = port.sells.includes(commodity) 
-        ? Math.round(basePrice * (0.7 + Math.random() * sellVariation))  // 70-90%
-        : null;
-        
-      const buyPrice = port.buys.includes(commodity)
-        ? Math.round(basePrice * (1.1 + Math.random() * buyVariation))   // 110-130%
-        : null;
-      
-      port.prices[commodity] = {
-        buy: buyPrice,   // What port pays player (higher)
-        sell: sellPrice  // What player pays port (lower)
-      };
-    });
-    
-    sectors[sectorId].port = port;
-    sectors[sectorId].name = `${sectors[sectorId].name} - ${port.name}`;
+    sectors[sectorId].tradingPost = tradingPost;
+    sectors[sectorId].name = `${sectors[sectorId].name} - ${tradingPost.name}`;
   });
+}
+
+export function updateTradingPostEfficiency(tradingPost: TradingPost): void {
+  const now = Date.now();
+  const timeSinceLastRegen = now - tradingPost.lastRegenTime;
+  const regenTimeMs = tradeConfig.regenTimeHours * 60 * 60 * 1000; // 24 hours in ms
+  
+  // Calculate how much efficiency should have regenerated
+  const regenProgress = Math.min(timeSinceLastRegen / regenTimeMs, 1.0);
+  const currentEfficiency = Math.min(1.0, tradingPost.tradeEfficiency + regenProgress);
+  
+  tradingPost.tradeEfficiency = Math.max(tradeConfig.minEfficiency, currentEfficiency);
+  tradingPost.lastRegenTime = now;
+}
+
+export function executeTrade(tradingPost: TradingPost): number {
+  // Update efficiency based on time passed
+  updateTradingPostEfficiency(tradingPost);
+  
+  // Calculate profit based on current efficiency
+  const profit = Math.round(tradingPost.baseProfit * tradingPost.tradeEfficiency);
+  
+  // Apply diminishing returns for next trade
+  tradingPost.tradeEfficiency = Math.max(
+    tradeConfig.minEfficiency, 
+    tradingPost.tradeEfficiency * tradeConfig.efficiencyDecay
+  );
+  
+  return profit;
 }

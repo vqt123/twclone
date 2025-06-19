@@ -4,21 +4,18 @@ import { Server as SocketIOServer } from 'socket.io';
 import {
   Action,
   PlayerUpdateType,
-  TradeType,
-  TradeAction,
   GameState,
   PlayerJoinedData,
   PlayerUpdateData,
-  TradeData,
   TradeResultData,
   PlayerTradedData,
   ShipUpgradeData,
   ShipUpgradeResultData,
   ShipType,
-  PortType
+  TradingPostType
 } from './types';
-import { commodities, shipTypes } from './game-config';
-import { generateSectors, generatePorts } from './universe-generator';
+import { tradingPosts, shipTypes } from './game-config';
+import { generateSectors, generateTradingPosts, executeTrade } from './universe-generator';
 import { updatePlayerEnergy, consumeEnergy } from './energy-system';
 import { createPlayer } from './player-factory';
 
@@ -33,11 +30,11 @@ app.use(express.static('public'));
 const gameState: GameState = {
   sectors: generateSectors(),
   players: {},
-  commodities: commodities,
+  tradingPosts: tradingPosts,
   shipTypes: shipTypes
 };
 
-generatePorts(gameState.sectors);
+generateTradingPosts(gameState.sectors);
 
 io.on('connection', (socket) => {
   console.log('Player connected:', socket.id);
@@ -50,7 +47,7 @@ io.on('connection', (socket) => {
     playerId: player.id,
     player: player,
     sectors: gameState.sectors,
-    commodities: gameState.commodities,
+    tradingPosts: gameState.tradingPosts,
     shipTypes: gameState.shipTypes
   };
   
@@ -88,98 +85,41 @@ io.on('connection', (socket) => {
     } as PlayerUpdateData);
   });
 
-  socket.on('buyItem', (data: TradeData) => {
+  socket.on('trade', () => {
     const player = Object.values(gameState.players).find(p => p.socketId === socket.id)!;
     const currentSector = gameState.sectors[player.currentSector];
-    const port = currentSector.port!;
+    const tradingPost = currentSector.tradingPost;
+    
+    if (!tradingPost) {
+      socket.emit('error', 'No trading post in this sector');
+      return;
+    }
     
     if (!consumeEnergy(player, Action.TRADE)) {
       socket.emit('error', 'Not enough energy to trade');
       return;
     }
     
-    if (!port.sells.includes(data.commodity)) {
-      socket.emit('error', `This port doesn't sell ${data.commodity}`);
-      return;
-    }
+    // Execute trade and get profit
+    const baseProfit = executeTrade(tradingPost);
     
-    const price = port.prices[data.commodity].sell!;
-    const quantity = data.quantity || 1;
-    const totalCost = price * quantity;
+    // Apply ship multiplier
+    const shipInfo = gameState.shipTypes[player.ship];
+    const finalProfit = Math.round(baseProfit * shipInfo.tradeMultiplier);
     
-    if (player.credits < totalCost) {
-      socket.emit('error', 'Not enough credits');
-      return;
-    }
-    
-    if (player.cargoUsed + quantity > player.cargoCapacity) {
-      socket.emit('error', 'Not enough cargo space');
-      return;
-    }
-    
-    player.credits -= totalCost;
-    player.inventory[data.commodity] += quantity;
-    player.cargoUsed += quantity;
+    player.credits += finalProfit;
     
     socket.emit('tradeResult', {
-      type: TradeType.BUY,
-      commodity: data.commodity,
-      quantity: quantity,
-      price: price,
-      totalCost: totalCost,
-      player: player
+      profit: finalProfit,
+      newEfficiency: tradingPost.tradeEfficiency,
+      player: player,
+      tradingPostName: tradingPost.name
     } as TradeResultData);
     
     socket.to(currentSector.id.toString()).emit('playerTraded', {
       playerName: player.name,
-      type: TradeAction.BOUGHT,
-      commodity: data.commodity,
-      quantity: quantity
-    } as PlayerTradedData);
-  });
-
-  socket.on('sellItem', (data: TradeData) => {
-    const player = Object.values(gameState.players).find(p => p.socketId === socket.id)!;
-    const currentSector = gameState.sectors[player.currentSector];
-    const port = currentSector.port!;
-    
-    if (!consumeEnergy(player, Action.TRADE)) {
-      socket.emit('error', 'Not enough energy to trade');
-      return;
-    }
-    
-    if (!port.buys.includes(data.commodity)) {
-      socket.emit('error', `This port doesn't buy ${data.commodity}`);
-      return;
-    }
-    
-    const quantity = data.quantity || 1;
-    if (player.inventory[data.commodity] < quantity) {
-      socket.emit('error', `Not enough ${data.commodity} to sell`);
-      return;
-    }
-    
-    const price = port.prices[data.commodity].buy!;
-    const totalEarned = price * quantity;
-    
-    player.credits += totalEarned;
-    player.inventory[data.commodity] -= quantity;
-    player.cargoUsed -= quantity;
-    
-    socket.emit('tradeResult', {
-      type: TradeType.SELL,
-      commodity: data.commodity,
-      quantity: quantity,
-      price: price,
-      totalEarned: totalEarned,
-      player: player
-    } as TradeResultData);
-    
-    socket.to(currentSector.id.toString()).emit('playerTraded', {
-      playerName: player.name,
-      type: TradeAction.SOLD,
-      commodity: data.commodity,
-      quantity: quantity
+      profit: finalProfit,
+      tradingPostName: tradingPost.name
     } as PlayerTradedData);
   });
 
@@ -188,7 +128,7 @@ io.on('connection', (socket) => {
     const currentSector = gameState.sectors[player.currentSector];
     
     // Check if player is at a StarPort
-    if (!currentSector.port || currentSector.port.type !== PortType.STARPORT) {
+    if (!currentSector.tradingPost || currentSector.tradingPost.type !== TradingPostType.STARPORT) {
       socket.emit('error', 'Ship upgrades only available at StarPorts');
       return;
     }
@@ -213,16 +153,9 @@ io.on('connection', (socket) => {
       return;
     }
     
-    // Check if cargo fits in new ship (prevent losing items)
-    if (player.cargoUsed > newShipInfo.cargoCapacity) {
-      socket.emit('error', 'Cannot downgrade - cargo exceeds new ship capacity');
-      return;
-    }
-    
     // Perform the upgrade
     player.credits -= newShipInfo.price;
     player.ship = data.shipType;
-    player.cargoCapacity = newShipInfo.cargoCapacity;
     
     socket.emit('shipUpgradeResult', {
       success: true,

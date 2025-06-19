@@ -1,9 +1,5 @@
 // Enums for type safety
-export enum Commodity {
-  ORE = 'ore',
-  FOOD = 'food',
-  EQUIPMENT = 'equipment'
-}
+// Removed Commodity enum - replaced with simple trading system
 
 export enum ShipType {
   SCOUT = 'scout',
@@ -11,9 +7,9 @@ export enum ShipType {
   FREIGHTER = 'freighter'
 }
 
-export enum PortType {
+export enum TradingPostType {
   MINING = 'mining',
-  AGRICULTURAL = 'agricultural',
+  AGRICULTURAL = 'agricultural', 
   INDUSTRIAL = 'industrial',
   COMMERCIAL = 'commercial',
   STARPORT = 'starport'
@@ -30,34 +26,24 @@ export enum PlayerUpdateType {
   MOVED = 'moved'
 }
 
-export enum TradeType {
-  BUY = 'buy',
-  SELL = 'sell'
-}
-
-export enum TradeAction {
-  BOUGHT = 'bought',
-  SOLD = 'sold'
-}
+// Removed TradeType and TradeAction - simplified to single trade action
 
 // Base interfaces
-export interface CommodityInfo {
+export interface TradingPostInfo {
   name: string;
-  basePrice: number;
+  baseProfit: number;
+  description: string;
 }
 
 export interface ShipInfo {
   name: string;
-  cargoCapacity: number;
+  cargoCapacity: number; // Keep for future use, but now affects trade multiplier
   energyEfficiency: number;
+  tradeMultiplier: number; // New: affects trade profits
   price: number;
 }
 
-export interface PortInfo {
-  buys: Commodity[];
-  sells: Commodity[];
-  name: string;
-}
+// Removed PortInfo - replaced with TradingPostInfo
 
 export interface EnergyConfig {
   maxEnergy: number;
@@ -76,29 +62,18 @@ export interface Player {
   name: string;
   currentSector: number;
   credits: number;
-  inventory: {
-    [Commodity.ORE]: number;
-    [Commodity.FOOD]: number;
-    [Commodity.EQUIPMENT]: number;
-  };
   ship: ShipType;
-  cargoCapacity: number;
-  cargoUsed: number;
   energy: number;
   lastEnergyUpdate: number;
 }
 
-export interface Port {
-  type: PortType;
+export interface TradingPost {
+  type: TradingPostType;
   name: string;
-  buys: Commodity[];
-  sells: Commodity[];
-  prices: {
-    [key in Commodity]: {
-      buy: number | null;
-      sell: number | null;
-    };
-  };
+  baseProfit: number;
+  tradeEfficiency: number; // 0-1, decreases with each trade
+  lastRegenTime: number; // timestamp for regeneration
+  description: string;
 }
 
 export interface Sector {
@@ -108,13 +83,13 @@ export interface Sector {
   y: number;
   connections: number[];
   players: string[];
-  port: Port | null;
+  tradingPost: TradingPost | null;
 }
 
 export interface GameState {
   sectors: { [key: number]: Sector };
   players: { [key: string]: Player };
-  commodities: { [key in Commodity]: CommodityInfo };
+  tradingPosts: { [key in TradingPostType]: TradingPostInfo };
   shipTypes: { [key in ShipType]: ShipInfo };
 }
 
@@ -123,7 +98,7 @@ export interface PlayerJoinedData {
   playerId: string;
   player: Player;
   sectors: { [key: number]: Sector };
-  commodities: { [key in Commodity]: CommodityInfo };
+  tradingPosts: { [key in TradingPostType]: TradingPostInfo };
   shipTypes: { [key in ShipType]: ShipInfo };
 }
 
@@ -133,26 +108,17 @@ export interface PlayerUpdateData {
   sectors: { [key: number]: Sector };
 }
 
-export interface TradeData {
-  commodity: Commodity;
-  quantity?: number;
-}
-
 export interface TradeResultData {
-  type: TradeType;
-  commodity: Commodity;
-  quantity: number;
-  price: number;
-  totalCost?: number;
-  totalEarned?: number;
+  profit: number;
+  newEfficiency: number;
   player: Player;
+  tradingPostName: string;
 }
 
 export interface PlayerTradedData {
   playerName: string;
-  type: TradeAction;
-  commodity: Commodity;
-  quantity: number;
+  profit: number;
+  tradingPostName: string;
 }
 
 export interface ShipUpgradeData {

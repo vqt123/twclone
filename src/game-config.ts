@@ -1,9 +1,31 @@
-import { Commodity, ShipType, PortType, Action, CommodityInfo, ShipInfo, PortInfo, EnergyConfig } from './types';
+import { TradingPostType, ShipType, Action, TradingPostInfo, ShipInfo, EnergyConfig } from './types';
 
-export const commodities: { [key in Commodity]: CommodityInfo } = {
-  [Commodity.ORE]: { name: 'Ore', basePrice: 50 },
-  [Commodity.FOOD]: { name: 'Food', basePrice: 30 },
-  [Commodity.EQUIPMENT]: { name: 'Equipment', basePrice: 100 }
+export const tradingPosts: { [key in TradingPostType]: TradingPostInfo } = {
+  [TradingPostType.MINING]: { 
+    name: 'Mining Station', 
+    baseProfit: 75,
+    description: 'Industrial data on mining operations and asteroid surveys'
+  },
+  [TradingPostType.AGRICULTURAL]: { 
+    name: 'Agricultural Port', 
+    baseProfit: 60,
+    description: 'Agricultural market trends and crop yield forecasts'
+  },
+  [TradingPostType.INDUSTRIAL]: { 
+    name: 'Industrial Complex', 
+    baseProfit: 85,
+    description: 'Manufacturing schedules and supply chain intelligence'
+  },
+  [TradingPostType.COMMERCIAL]: { 
+    name: 'Commercial Hub', 
+    baseProfit: 90,
+    description: 'Trade route analysis and merchant fleet movements'
+  },
+  [TradingPostType.STARPORT]: { 
+    name: 'StarPort', 
+    baseProfit: 100,
+    description: 'Comprehensive sector intelligence and navigation data'
+  }
 };
 
 export const shipTypes: { [key in ShipType]: ShipInfo } = {
@@ -11,18 +33,21 @@ export const shipTypes: { [key in ShipType]: ShipInfo } = {
     name: 'Scout Ship', 
     cargoCapacity: 10, 
     energyEfficiency: 0.8,
+    tradeMultiplier: 1.0, // Base trading efficiency
     price: 0 
   },
   [ShipType.TRADER]: { 
     name: 'Trader Vessel', 
     cargoCapacity: 30, 
     energyEfficiency: 1.0,
+    tradeMultiplier: 1.5, // 50% more profit from trading
     price: 5000 
   },
   [ShipType.FREIGHTER]: { 
     name: 'Heavy Freighter', 
     cargoCapacity: 50, 
     energyEfficiency: 1.5,
+    tradeMultiplier: 2.0, // 100% more profit from trading
     price: 15000 
   }
 };
@@ -37,10 +62,9 @@ export const energyConfig: EnergyConfig = {
   }
 };
 
-export const portTypes: { [key in PortType]: PortInfo } = {
-  [PortType.MINING]: { buys: [Commodity.ORE], sells: [Commodity.EQUIPMENT], name: 'Mining Station' },
-  [PortType.AGRICULTURAL]: { buys: [Commodity.FOOD], sells: [Commodity.ORE], name: 'Agricultural Port' },
-  [PortType.INDUSTRIAL]: { buys: [Commodity.EQUIPMENT], sells: [Commodity.FOOD], name: 'Industrial Complex' },
-  [PortType.COMMERCIAL]: { buys: [Commodity.ORE, Commodity.FOOD], sells: [Commodity.EQUIPMENT], name: 'Commercial Hub' },
-  [PortType.STARPORT]: { buys: [Commodity.ORE, Commodity.FOOD, Commodity.EQUIPMENT], sells: [Commodity.ORE, Commodity.FOOD, Commodity.EQUIPMENT], name: 'StarPort' }
+// Trading configuration
+export const tradeConfig = {
+  efficiencyDecay: 0.7, // Each trade reduces efficiency to 70% of previous
+  regenTimeHours: 24, // Time to fully regenerate from 0% to 100%
+  minEfficiency: 0.05, // Minimum efficiency (5%)
 };
