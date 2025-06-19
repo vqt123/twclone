@@ -120,6 +120,71 @@
         .log-entry {
             margin: 2px 0;
         }
+        
+        .port-info {
+            border: 1px solid #006600;
+            padding: 10px;
+            margin-bottom: 10px;
+            background-color: #001100;
+        }
+        
+        .port-info h4 {
+            color: #ffff00;
+            margin: 0 0 10px 0;
+        }
+        
+        .inventory {
+            margin-bottom: 20px;
+        }
+        
+        .inventory-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 2px 0;
+        }
+        
+        .trade-section {
+            margin-top: 20px;
+        }
+        
+        .trade-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .trade-item {
+            border: 1px solid #006600;
+            padding: 5px;
+            background-color: #001100;
+        }
+        
+        .trade-button {
+            background-color: #003300;
+            color: #00ff00;
+            border: 1px solid #00ff00;
+            padding: 3px 8px;
+            margin: 2px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 10px;
+        }
+        
+        .trade-button:hover {
+            background-color: #005500;
+        }
+        
+        .trade-button:disabled {
+            background-color: #222;
+            color: #666;
+            cursor: not-allowed;
+        }
+        
+        .price-display {
+            font-size: 10px;
+            color: #ffff00;
+        }
     </style>
 </head>
 <body>
@@ -148,6 +213,28 @@
                     <div>Name: <span id="playerName">-</span></div>
                     <div>Credits: <span id="playerCredits">-</span></div>
                     <div>Current Sector: <span id="currentSector">-</span></div>
+                    <div>Cargo: <span id="cargoUsed">-</span>/<span id="cargoCapacity">-</span></div>
+                </div>
+                
+                <div class="inventory">
+                    <h4>Inventory:</h4>
+                    <div class="inventory-item">
+                        <span>Ore:</span>
+                        <span id="inv-ore">0</span>
+                    </div>
+                    <div class="inventory-item">
+                        <span>Food:</span>
+                        <span id="inv-food">0</span>
+                    </div>
+                    <div class="inventory-item">
+                        <span>Equipment:</span>
+                        <span id="inv-equipment">0</span>
+                    </div>
+                </div>
+                
+                <div id="portInfo" class="port-info" style="display: none;">
+                    <h4 id="portName">-</h4>
+                    <div id="tradeControls" class="trade-controls"></div>
                 </div>
                 
                 <div class="players-list">
@@ -169,7 +256,8 @@
         let gameState = {
             player: null,
             sectors: {},
-            players: {}
+            players: {},
+            commodities: {}
         };
 
         function log(message) {
@@ -244,9 +332,21 @@
             document.getElementById('playerName').textContent = gameState.player.name;
             document.getElementById('playerCredits').textContent = gameState.player.credits;
             document.getElementById('currentSector').textContent = gameState.player.currentSector;
+            document.getElementById('cargoUsed').textContent = gameState.player.cargoUsed || 0;
+            document.getElementById('cargoCapacity').textContent = gameState.player.cargoCapacity || 20;
+            
+            // Update inventory
+            if (gameState.player.inventory) {
+                document.getElementById('inv-ore').textContent = gameState.player.inventory.ore || 0;
+                document.getElementById('inv-food').textContent = gameState.player.inventory.food || 0;
+                document.getElementById('inv-equipment').textContent = gameState.player.inventory.equipment || 0;
+            }
             
             const currentSector = gameState.sectors[gameState.player.currentSector];
             const playersDiv = document.getElementById('playersInSector');
+            
+            // Update port info
+            updatePortInfo(currentSector);
             
             if (currentSector && currentSector.players && currentSector.players.length > 0) {
                 playersDiv.innerHTML = '';
@@ -264,11 +364,57 @@
             }
         }
 
+        function updatePortInfo(sector) {
+            const portInfo = document.getElementById('portInfo');
+            const portName = document.getElementById('portName');
+            const tradeControls = document.getElementById('tradeControls');
+            
+            if (sector && sector.port) {
+                portInfo.style.display = 'block';
+                portName.textContent = sector.port.name;
+                tradeControls.innerHTML = '';
+                
+                Object.keys(gameState.commodities).forEach(commodity => {
+                    const prices = sector.port.prices[commodity];
+                    if (prices.buy || prices.sell) {
+                        const tradeItem = document.createElement('div');
+                        tradeItem.className = 'trade-item';
+                        
+                        let content = `<strong>${gameState.commodities[commodity].name}</strong><br>`;
+                        
+                        if (prices.sell) {
+                            content += `<div class="price-display">Buy: ${prices.sell} credits</div>`;
+                            content += `<button class="trade-button" onclick="buyItem('${commodity}')">Buy 1</button>`;
+                        }
+                        
+                        if (prices.buy) {
+                            content += `<div class="price-display">Sell: ${prices.buy} credits</div>`;
+                            content += `<button class="trade-button" onclick="sellItem('${commodity}')">Sell 1</button>`;
+                        }
+                        
+                        tradeItem.innerHTML = content;
+                        tradeControls.appendChild(tradeItem);
+                    }
+                });
+            } else {
+                portInfo.style.display = 'none';
+            }
+        }
+
+        function buyItem(commodity) {
+            socket.emit('buyItem', { commodity: commodity, quantity: 1 });
+        }
+
+        function sellItem(commodity) {
+            socket.emit('sellItem', { commodity: commodity, quantity: 1 });
+        }
+
         // Socket event handlers
         socket.on('playerJoined', (data) => {
             gameState.player = data.player;
             gameState.sectors = data.sectors;
             gameState.players[data.player.id] = data.player;
+            gameState.commodities = data.commodities || {};
             
             log(`Welcome to TradeWars! You are ${data.player.name}`);
             log(`Starting in ${gameState.sectors[data.player.currentSector].name}`);
@@ -309,6 +455,21 @@
 
         socket.on('error', (message) => {
             log(`ERROR: ${message}`);
+        });
+
+        socket.on('tradeResult', (data) => {
+            gameState.player = data.player;
+            updatePlayerInfo();
+            
+            if (data.type === 'buy') {
+                log(`Bought ${data.quantity} ${data.commodity} for ${data.totalCost} credits`);
+            } else {
+                log(`Sold ${data.quantity} ${data.commodity} for ${data.totalEarned} credits`);
+            }
+        });
+
+        socket.on('playerTraded', (data) => {
+            log(`${data.playerName} ${data.type} ${data.quantity} ${data.commodity}`);
         });
 
         log('Connecting to TradeWars server...');

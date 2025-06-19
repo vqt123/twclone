@@ -12,7 +12,10 @@
       "WebFetch(domain:railway.app)",
       "Bash(git init:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(npm install:*)",
+      "Bash(railway login:*)",
+      "Bash(gh:*)"
     ],
     "deny": []
   }
