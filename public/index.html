@@ -185,6 +185,28 @@
             font-size: 10px;
             color: #ffff00;
         }
+        
+        .energy-bar {
+            width: 100%;
+            height: 10px;
+            background-color: #333;
+            border: 1px solid #666;
+            margin: 5px 0;
+        }
+        
+        .energy-fill {
+            height: 100%;
+            background-color: #00ff00;
+            transition: width 0.3s ease;
+        }
+        
+        .energy-fill.low {
+            background-color: #ff6600;
+        }
+        
+        .energy-fill.critical {
+            background-color: #ff0000;
+        }
     </style>
 </head>
 <body>
@@ -212,8 +234,13 @@
                 <div class="status">
                     <div>Name: <span id="playerName">-</span></div>
                     <div>Credits: <span id="playerCredits">-</span></div>
+                    <div>Ship: <span id="playerShip">-</span></div>
                     <div>Current Sector: <span id="currentSector">-</span></div>
                     <div>Cargo: <span id="cargoUsed">-</span>/<span id="cargoCapacity">-</span></div>
+                    <div>Energy: <span id="playerEnergy">-</span>/2400</div>
+                    <div class="energy-bar">
+                        <div class="energy-fill" id="energyFill" style="width: 100%;"></div>
+                    </div>
                 </div>
                 
                 <div class="inventory">
@@ -257,7 +284,8 @@
             player: null,
             sectors: {},
             players: {},
-            commodities: {}
+            commodities: {},
+            shipTypes: {}
         };
 
         function log(message) {
@@ -334,6 +362,27 @@
             document.getElementById('currentSector').textContent = gameState.player.currentSector;
             document.getElementById('cargoUsed').textContent = gameState.player.cargoUsed || 0;
             document.getElementById('cargoCapacity').textContent = gameState.player.cargoCapacity || 20;
+            
+            // Update ship and energy info
+            if (gameState.player.ship && gameState.shipTypes) {
+                document.getElementById('playerShip').textContent = gameState.shipTypes[gameState.player.ship].name;
+            }
+            
+            const energy = gameState.player.energy || 2400;
+            document.getElementById('playerEnergy').textContent = energy;
+            
+            // Update energy bar
+            const energyFill = document.getElementById('energyFill');
+            const energyPercent = (energy / 2400) * 100;
+            energyFill.style.width = energyPercent + '%';
+            
+            // Update energy bar color based on percentage
+            energyFill.className = 'energy-fill';
+            if (energyPercent < 20) {
+                energyFill.classList.add('critical');
+            } else if (energyPercent < 50) {
+                energyFill.classList.add('low');
+            }
             
             // Update inventory
             if (gameState.player.inventory) {
@@ -415,6 +464,7 @@
             gameState.sectors = data.sectors;
             gameState.players[data.player.id] = data.player;
             gameState.commodities = data.commodities || {};
+            gameState.shipTypes = data.shipTypes || {};
             
             log(`Welcome to TradeWars! You are ${data.player.name}`);
             log(`Starting in ${gameState.sectors[data.player.currentSector].name}`);
@@ -471,6 +521,13 @@
         socket.on('playerTraded', (data) => {
             log(`${data.playerName} ${data.type} ${data.quantity} ${data.commodity}`);
         });
+
+        // Auto-update energy display every 10 seconds
+        setInterval(() => {
+            if (gameState.player) {
+                updatePlayerInfo();
+            }
+        }, 10000);
 
         log('Connecting to TradeWars server...');
     </script>

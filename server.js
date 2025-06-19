@@ -18,6 +18,37 @@ const commodities = {
   equipment: { name: 'Equipment', basePrice: 100 }
 };
 
+const shipTypes = {
+  scout: { 
+    name: 'Scout Ship', 
+    cargoCapacity: 10, 
+    energyEfficiency: 0.8, // Uses 80% energy for actions
+    price: 0 
+  },
+  trader: { 
+    name: 'Trader Vessel', 
+    cargoCapacity: 30, 
+    energyEfficiency: 1.0, // Uses 100% energy for actions
+    price: 5000 
+  },
+  freighter: { 
+    name: 'Heavy Freighter', 
+    cargoCapacity: 50, 
+    energyEfficiency: 1.5, // Uses 150% energy for actions
+    price: 15000 
+  }
+};
+
+const energyConfig = {
+  maxEnergy: 2400,
+  regenRate: 100, // energy per hour
+  regenInterval: 36000, // 36 seconds = 1/100th of an hour
+  costs: {
+    move: 10,
+    trade: 5
+  }
+};
+
 const portTypes = {
   mining: { buys: ['ore'], sells: ['equipment'], name: 'Mining Station' },
   agricultural: { buys: ['food'], sells: ['ore'], name: 'Agricultural Port' },
@@ -29,7 +60,8 @@ const portTypes = {
 const gameState = {
   sectors: {},
   players: {},
-  commodities: commodities
+  commodities: commodities,
+  shipTypes: shipTypes
 };
 
 function generateSectors() {
@@ -104,6 +136,30 @@ function generatePorts(sectors) {
   });
 }
 
+function updatePlayerEnergy(player) {
+  const now = Date.now();
+  const timeDiff = now - player.lastEnergyUpdate;
+  const energyToAdd = Math.floor(timeDiff / energyConfig.regenInterval);
+  
+  if (energyToAdd > 0) {
+    player.energy = Math.min(energyConfig.maxEnergy, player.energy + energyToAdd);
+    player.lastEnergyUpdate = now;
+  }
+}
+
+function consumeEnergy(player, action) {
+  updatePlayerEnergy(player);
+  const ship = shipTypes[player.ship];
+  const energyCost = Math.ceil(energyConfig.costs[action] * ship.energyEfficiency);
+  
+  if (player.energy < energyCost) {
+    return false; // Not enough energy
+  }
+  
+  player.energy -= energyCost;
+  return true;
+}
+
 gameState.sectors = generateSectors();
 generatePorts(gameState.sectors);
 
@@ -122,8 +178,11 @@ io.on('connection', (socket) => {
       food: 0,
       equipment: 0
     },
-    cargoCapacity: 20,
-    cargoUsed: 0
+    ship: 'scout',
+    cargoCapacity: shipTypes.scout.cargoCapacity,
+    cargoUsed: 0,
+    energy: energyConfig.maxEnergy,
+    lastEnergyUpdate: Date.now()
   };
   
   gameState.players[playerId] = player;
@@ -133,7 +192,8 @@ io.on('connection', (socket) => {
     playerId: playerId,
     player: player,
     sectors: gameState.sectors,
-    commodities: gameState.commodities
+    commodities: gameState.commodities,
+    shipTypes: gameState.shipTypes
   });
   
   socket.broadcast.emit('playerUpdate', {
@@ -146,11 +206,20 @@ io.on('connection', (socket) => {
     const player = Object.values(gameState.players).find(p => p.socketId === socket.id);
     if (!player) return;
     
+    // Update energy before checking if move is possible
+    updatePlayerEnergy(player);
+    
     const currentSector = gameState.sectors[player.currentSector];
     const targetSector = gameState.sectors[targetSectorId];
     
     if (!targetSector || !currentSector.connections.includes(targetSectorId)) {
       socket.emit('error', 'Invalid move');
+      return;
+    }
+    
+    // Check if player has enough energy to move
+    if (!consumeEnergy(player, 'move')) {
+      socket.emit('error', 'Not enough energy to move');
       return;
     }
     
@@ -172,6 +241,13 @@ io.on('connection', (socket) => {
   socket.on('buyItem', (data) => {
     const player = Object.values(gameState.players).find(p => p.socketId === socket.id);
     if (!player) return;
+    
+    // Update energy and check if player has enough for trading
+    updatePlayerEnergy(player);
+    if (!consumeEnergy(player, 'trade')) {
+      socket.emit('error', 'Not enough energy to trade');
+      return;
+    }
     
     const currentSector = gameState.sectors[player.currentSector];
     const port = currentSector.port;
@@ -221,6 +297,13 @@ io.on('connection', (socket) => {
   socket.on('sellItem', (data) => {
     const player = Object.values(gameState.players).find(p => p.socketId === socket.id);
     if (!player) return;
+    
+    // Update energy and check if player has enough for trading
+    updatePlayerEnergy(player);
+    if (!consumeEnergy(player, 'trade')) {
+      socket.emit('error', 'Not enough energy to trade');
+      return;
+    }
     
     const currentSector = gameState.sectors[player.currentSector];
     const port = currentSector.port;
