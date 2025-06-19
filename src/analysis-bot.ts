@@ -1,0 +1,374 @@
+import * as io from 'socket.io-client';
+import { GameLogger } from './game-logger';
+import { ShipType, TradingPostType } from './types';
+
+export type BotStrategy = 'greedy' | 'explorer' | 'optimizer' | 'random';
+
+interface GameState {
+  player: any;
+  sectors: { [key: number]: any };
+  players: { [key: string]: any };
+  tradingPosts: any;
+  shipTypes: any;
+}
+
+interface TradingPost {
+  sectorId: number;
+  name: string;
+  type: string;
+  distance: number;
+}
+
+export class AnalysisBot {
+  private socket: any;
+  private logger: GameLogger;
+  private gameState: GameState | null = null;
+  private strategy: BotStrategy;
+  private botId: string;
+  private isActive: boolean = false;
+  private actionQueue: Array<() => Promise<void>> = [];
+  private currentTarget: number | null = null;
+  private lastScanTime: number = 0;
+  private scanCooldown: number = 5000; // 5 seconds between scans
+  private lastActionTime: number = 0;
+  private actionCooldown: number = 1000; // 1 second between actions
+
+  constructor(
+    serverUrl: string,
+    botId: string,
+    strategy: BotStrategy,
+    logger: GameLogger
+  ) {
+    this.botId = botId;
+    this.strategy = strategy;
+    this.logger = logger;
+    this.socket = io.default(serverUrl);
+    this.setupEventHandlers();
+  }
+
+  private setupEventHandlers() {
+    this.socket.on('connect', () => {
+      this.logger.logSystem(`Bot ${this.botId} connected`, { strategy: this.strategy });
+      console.log(`🤖 Bot ${this.botId} (${this.strategy}) connected`);
+    });
+
+    this.socket.on('disconnect', () => {
+      this.logger.logSystem(`Bot ${this.botId} disconnected`);
+      console.log(`🔌 Bot ${this.botId} disconnected`);
+      this.isActive = false;
+    });
+
+    this.socket.on('playerJoined', (data: any) => {
+      this.gameState = {
+        player: data.player,
+        sectors: data.sectors,
+        players: {},
+        tradingPosts: data.tradingPosts,
+        shipTypes: data.shipTypes
+      };
+      this.gameState.players[data.player.id] = data.player;
+      
+      this.logger.logAction(this.botId, 'joined', {
+        playerId: data.player.id,
+        playerName: data.player.name,
+        startingSector: data.player.currentSector,
+        startingCredits: data.player.credits,
+        startingShip: data.player.ship,
+        startingEnergy: data.player.energy
+      });
+
+      this.logger.logState(this.botId, {
+        sector: data.player.currentSector,
+        credits: data.player.credits,
+        energy: data.player.energy,
+        ship: data.player.ship
+      });
+
+      console.log(`✅ Bot ${this.botId} joined as ${data.player.name}`);
+      this.isActive = true;
+      this.startBehavior();
+    });
+
+    this.socket.on('playerUpdate', (data: any) => {
+      if (!this.gameState || !data.player) return;
+
+      // Update game state
+      this.gameState.sectors = data.sectors;
+      if (data.player.id === this.gameState.player?.id) {
+        this.gameState.player = data.player;
+      }
+      this.gameState.players[data.player.id] = data.player;
+
+      if (data.player.id === this.gameState.player?.id) {
+        this.logger.logAction(this.botId, 'update', {
+          updateType: data.type,
+          sector: data.player.currentSector,
+          credits: data.player.credits,
+          energy: data.player.energy
+        });
+
+        this.logger.logState(this.botId, {
+          sector: data.player.currentSector,
+          credits: data.player.credits,
+          energy: data.player.energy,
+          ship: data.player.ship
+        });
+
+        if (data.type === 'moved') {
+          this.logger.logNavigation(this.botId, {
+            fromSector: this.currentTarget,
+            toSector: data.player.currentSector,
+            energyAfterMove: data.player.energy
+          });
+        }
+      }
+    });
+
+    this.socket.on('tradeResult', (data: any) => {
+      if (!this.gameState) return;
+      
+      this.gameState.player = data.player;
+      
+      this.logger.logTrading(this.botId, {
+        tradingPostName: data.tradingPostName,
+        profit: data.profit,
+        newEfficiency: data.newEfficiency,
+        creditsAfter: data.player.credits,
+        energyAfter: data.player.energy
+      });
+
+      console.log(`💰 Bot ${this.botId} traded at ${data.tradingPostName} for ${data.profit} credits`);
+    });
+
+    this.socket.on('error', (message: any) => {
+      this.logger.logAction(this.botId, 'error', { message });
+      console.log(`❌ Bot ${this.botId} error: ${message}`);
+    });
+  }
+
+  private async startBehavior() {
+    while (this.isActive && this.gameState) {
+      try {
+        await this.executeBehavior();
+        await this.sleep(this.actionCooldown);
+      } catch (error) {
+        this.logger.logAction(this.botId, 'error', { error: error?.toString() });
+        console.error(`💥 Bot ${this.botId} behavior error:`, error);
+        await this.sleep(5000); // Wait longer on error
+      }
+    }
+  }
+
+  private async executeBehavior() {
+    if (!this.gameState || !this.gameState.player) return;
+
+    const now = Date.now();
+    if (now - this.lastActionTime < this.actionCooldown) return;
+
+    // Check if we need energy
+    if (this.gameState.player.energy < 50) {
+      console.log(`⚡ Bot ${this.botId} waiting for energy (${this.gameState.player.energy})`);
+      await this.sleep(10000); // Wait 10 seconds for energy
+      return;
+    }
+
+    // Scan for trading posts periodically
+    if (now - this.lastScanTime > this.scanCooldown) {
+      const tradingPosts = await this.scanForTradingPosts();
+      this.lastScanTime = now;
+      
+      if (tradingPosts.length > 0) {
+        const target = this.selectTarget(tradingPosts);
+        if (target) {
+          await this.navigateToSector(target.sectorId);
+          this.lastActionTime = now;
+          return;
+        }
+      }
+    }
+
+    // If no target, explore randomly
+    await this.exploreRandomly();
+    this.lastActionTime = now;
+  }
+
+  private scanForTradingPosts(): TradingPost[] {
+    if (!this.gameState || !this.gameState.player) return [];
+
+    const currentSector = this.gameState.sectors[this.gameState.player.currentSector];
+    if (!currentSector) return [];
+
+    const scanRange = 10;
+    const gridSize = 50;
+    const currentX = currentSector.x;
+    const currentY = currentSector.y;
+    const tradingPosts: TradingPost[] = [];
+
+    for (let dx = -scanRange; dx <= scanRange; dx++) {
+      for (let dy = -scanRange; dy <= scanRange; dy++) {
+        const x = currentX + dx;
+        const y = currentY + dy;
+        
+        if (x >= 0 && x < gridSize && y >= 0 && y < gridSize) {
+          const sectorId = x * gridSize + y + 1;
+          const sector = this.gameState.sectors[sectorId];
+          
+          if (sector && sector.tradingPost) {
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            tradingPosts.push({
+              sectorId: sectorId,
+              name: sector.tradingPost.name,
+              type: sector.tradingPost.type,
+              distance: distance
+            });
+          }
+        }
+      }
+    }
+
+    this.logger.logAction(this.botId, 'scan', {
+      tradingPostsFound: tradingPosts.length,
+      currentSector: this.gameState.player.currentSector,
+      scanRange: scanRange
+    });
+
+    return tradingPosts;
+  }
+
+  private selectTarget(tradingPosts: TradingPost[]): TradingPost | null {
+    if (tradingPosts.length === 0) return null;
+
+    switch (this.strategy) {
+      case 'greedy':
+        // Prefer StarPorts and Commercial Hubs (higher profits)
+        const highValue = tradingPosts.filter(tp => 
+          tp.type === 'starport' || tp.type === 'commercial'
+        );
+        if (highValue.length > 0) {
+          return highValue.sort((a, b) => a.distance - b.distance)[0];
+        }
+        return tradingPosts.sort((a, b) => a.distance - b.distance)[0];
+
+      case 'explorer':
+        // Prefer farther trading posts for exploration
+        return tradingPosts.sort((a, b) => b.distance - a.distance)[0];
+
+      case 'optimizer':
+        // Calculate profit/distance ratio (simplified)
+        const scored = tradingPosts.map(tp => ({
+          ...tp,
+          score: this.calculateTradingScore(tp)
+        }));
+        return scored.sort((a, b) => b.score - a.score)[0];
+
+      case 'random':
+      default:
+        return tradingPosts[Math.floor(Math.random() * tradingPosts.length)];
+    }
+  }
+
+  private calculateTradingScore(tradingPost: TradingPost): number {
+    // Simple scoring: base profit / distance
+    const baseProfits: { [key: string]: number } = {
+      'mining': 50,
+      'agricultural': 75,
+      'industrial': 100,
+      'commercial': 150,
+      'starport': 200
+    };
+    
+    const baseProfit = baseProfits[tradingPost.type] || 100;
+    return baseProfit / Math.max(tradingPost.distance, 1);
+  }
+
+  private async navigateToSector(sectorId: number) {
+    if (!this.gameState || !this.gameState.player) return;
+
+    this.currentTarget = sectorId;
+    
+    // Check if we're at a trading post in current sector
+    const currentSector = this.gameState.sectors[this.gameState.player.currentSector];
+    if (currentSector && currentSector.tradingPost && this.gameState.player.currentSector === sectorId) {
+      await this.executeTrade();
+      return;
+    }
+
+    // Check if target is directly connected
+    if (!currentSector || !currentSector.connections.includes(sectorId)) {
+      console.log(`⚠️  Bot ${this.botId} cannot directly reach sector ${sectorId} from ${this.gameState.player.currentSector}`);
+      // For now, just explore randomly instead
+      await this.exploreRandomly();
+      return;
+    }
+
+    this.logger.logNavigation(this.botId, {
+      targetSector: sectorId,
+      fromSector: this.gameState.player.currentSector,
+      energyBefore: this.gameState.player.energy
+    });
+
+    this.socket.emit('moveTo', sectorId);
+  }
+
+  private async executeTrade() {
+    if (!this.gameState) return;
+
+    this.logger.logAction(this.botId, 'trade_attempt', {
+      sector: this.gameState.player.currentSector,
+      creditsBefore: this.gameState.player.credits,
+      energyBefore: this.gameState.player.energy
+    });
+
+    this.socket.emit('trade');
+  }
+
+  private async exploreRandomly() {
+    if (!this.gameState || !this.gameState.player) return;
+
+    const currentSector = this.gameState.sectors[this.gameState.player.currentSector];
+    if (!currentSector || !currentSector.connections) return;
+
+    const randomConnection = currentSector.connections[
+      Math.floor(Math.random() * currentSector.connections.length)
+    ];
+
+    this.logger.logAction(this.botId, 'explore', {
+      fromSector: this.gameState.player.currentSector,
+      toSector: randomConnection,
+      reason: 'random_exploration'
+    });
+
+    this.socket.emit('moveTo', randomConnection);
+  }
+
+  private sleep(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  async stop() {
+    this.isActive = false;
+    this.socket.disconnect();
+    this.logger.logSystem(`Bot ${this.botId} stopped`);
+    console.log(`🛑 Bot ${this.botId} stopped`);
+  }
+
+  getStats() {
+    if (!this.gameState || !this.gameState.player) {
+      return {
+        botId: this.botId,
+        strategy: this.strategy,
+        status: 'not_connected'
+      };
+    }
+
+    return {
+      botId: this.botId,
+      strategy: this.strategy,
+      status: 'active',
+      sector: this.gameState.player.currentSector,
+      credits: this.gameState.player.credits,
+      energy: this.gameState.player.energy,
+      ship: this.gameState.player.ship
+    };
+  }
+}

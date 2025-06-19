@@ -7,11 +7,16 @@
     "start": "node dist/server.js",
     "dev": "nodemon --exec ts-node src/server.ts",
     "build": "tsc",
-    "postinstall": "npm run build"
+    "postinstall": "npm run build",
+    "analyze": "ts-node src/run-analysis.ts",
+    "analyze:quick": "ts-node src/run-analysis.ts --duration 120",
+    "analyze:extended": "ts-node src/run-analysis.ts --duration 600 --bots 5"
   },
   "dependencies": {
+    "@types/socket.io-client": "^1.4.36",
     "express": "^4.18.2",
     "socket.io": "^4.7.4",
+    "socket.io-client": "^4.8.1",
     "uuid": "^9.0.1"
   },
   "devDependencies": {
@@ -26,7 +31,13 @@
     "node": ">=16.0.0",
     "npm": ">=8.0.0"
   },
-  "keywords": ["tradewars", "multiplayer", "websocket", "space", "trading"],
+  "keywords": [
+    "tradewars",
+    "multiplayer",
+    "websocket",
+    "space",
+    "trading"
+  ],
   "repository": {
     "type": "git",
     "url": "."
