@@ -35,8 +35,8 @@ export function generateTradingPosts(sectors: { [key: number]: Sector }): void {
   const tradingPostTypes = Object.keys(tradingPosts) as TradingPostType[];
   const sectorIds = Object.keys(sectors).map(Number);
   
-  // Generate 50 trading posts (2% coverage) with better distribution
-  const targetPostCount = 50;
+  // Generate 83 trading posts (3.3% coverage) with better distribution  
+  const targetPostCount = 83;
   const tradingPostSectors: number[] = [];
   
   // First, ensure we have at least one of each type (5 posts)

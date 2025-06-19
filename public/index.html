@@ -326,6 +326,14 @@
                         <button id="jumpButton" class="connection-button" style="margin-left: 5px;">Jump</button>
                     </div>
                     
+                    <div style="margin-top: 15px;">
+                        <h4>Long Range Scan:</h4>
+                        <button id="scanButton" class="connection-button" style="background-color: #000066; border-color: #0066ff;">Scan for Trading Posts</button>
+                        <div id="scanResults" style="margin-top: 10px; font-size: 11px; color: #0099ff; display: none;">
+                            <div id="scanResultsList"></div>
+                        </div>
+                    </div>
+                    
                     <div id="autoNavControls" style="display: none; margin-top: 10px;">
                         <button id="cancelNavButton" class="connection-button" style="background-color: #660000; border-color: #ff0000;">Cancel Auto-Navigation</button>
                     </div>
@@ -340,6 +348,9 @@
                     <div>Ship: <span id="playerShip">-</span></div>
                     <div>Current Sector: <span id="currentSector">-</span></div>
                     <div>Energy: <span id="playerEnergy">-</span>/2400</div>
+                    <div style="font-size: 10px; color: #888; margin-top: 2px;">
+                        Regenerating: 100 energy/hour (1 every 36s)
+                    </div>
                     <div class="energy-bar">
                         <div class="energy-fill" id="energyFill" style="width: 100%;"></div>
                     </div>
@@ -850,6 +861,100 @@
             document.getElementById('jumpToSector').value = '';
         }
         
+        document.getElementById('jumpButton').addEventListener('click', jumpToSector);
+        document.getElementById('jumpToSector').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                jumpToSector();
+            }
+        });
+
+        // Long Range Scan functionality
+        function performLongRangeScan() {
+            if (!gameState.player) {
+                log('Wait for game to load before scanning');
+                return;
+            }
+            
+            const currentSector = gameState.sectors[gameState.player.currentSector];
+            if (!currentSector) return;
+            
+            const scanRange = 10; // Larger than local scanner (3)
+            const gridSize = 50;
+            const currentX = currentSector.x;
+            const currentY = currentSector.y;
+            
+            const tradingPosts = [];
+            
+            // Scan in a larger radius
+            for (let dx = -scanRange; dx <= scanRange; dx++) {
+                for (let dy = -scanRange; dy <= scanRange; dy++) {
+                    const x = currentX + dx;
+                    const y = currentY + dy;
+                    
+                    if (x >= 0 && x < gridSize && y >= 0 && y < gridSize) {
+                        const sectorId = x * gridSize + y + 1;
+                        const sector = gameState.sectors[sectorId];
+                        
+                        if (sector && sector.tradingPost) {
+                            const distance = Math.sqrt(dx * dx + dy * dy);
+                            tradingPosts.push({
+                                sectorId: sectorId,
+                                name: sector.tradingPost.name,
+                                type: sector.tradingPost.type,
+                                distance: Math.round(distance * 10) / 10
+                            });
+                        }
+                    }
+                }
+            }
+            
+            // Display results
+            const scanResults = document.getElementById('scanResults');
+            const scanResultsList = document.getElementById('scanResultsList');
+            
+            if (tradingPosts.length > 0) {
+                // Sort by distance
+                tradingPosts.sort((a, b) => a.distance - b.distance);
+                
+                scanResultsList.innerHTML = `
+                    <strong>Trading Posts Found (${tradingPosts.length}):</strong><br>
+                    ${tradingPosts.map(post => 
+                        `<div style="margin: 3px 0; cursor: pointer; padding: 2px; border: 1px solid #004488;" 
+                              onclick="startAutoNavigation(${post.sectorId})">
+                            Sector ${post.sectorId}: ${post.name} (${post.distance} units)
+                        </div>`
+                    ).join('')}
+                `;
+                scanResults.style.display = 'block';
+                log(`Long range scan complete: Found ${tradingPosts.length} trading posts`);
+            } else {
+                // Provide hints about where to go
+                const currentX = currentSector.x;
+                const currentY = currentSector.y;
+                const centerX = Math.floor(gridSize / 2);
+                const centerY = Math.floor(gridSize / 2);
+                
+                let hint = '';
+                if (currentX < centerX / 2) hint += 'Try exploring further East. ';
+                else if (currentX > gridSize - centerX / 2) hint += 'Try exploring further West. ';
+                
+                if (currentY < centerY / 2) hint += 'Try exploring further South. ';
+                else if (currentY > gridSize - centerY / 2) hint += 'Try exploring further North. ';
+                
+                if (!hint) hint = 'Try exploring different regions of space. ';
+                
+                scanResultsList.innerHTML = `
+                    <strong>No trading posts detected in scan range</strong><br>
+                    <small style="color: #ffaa00;">${hint}</small><br>
+                    <small>Trading posts are distributed throughout the galaxy</small>
+                `;
+                scanResults.style.display = 'block';
+                log('Long range scan complete: No trading posts detected');
+            }
+        }
+        
+        document.getElementById('scanButton').addEventListener('click', performLongRangeScan);
+
         document.getElementById('jumpButton').addEventListener('click', jumpToSector);
         document.getElementById('jumpToSector').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {

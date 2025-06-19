@@ -13,6 +13,13 @@ TradeWars Clone is a real-time multiplayer space trading game inspired by the cl
 - `npm start` - Run production server from compiled JavaScript
 - `npm run dev` - Development mode with TypeScript hot reload using ts-node
 
+**Testing & Playtesting:**
+- When playtesting with puppeteer/browser automation, run server in background: `npm run dev &`
+- The `&` is critical - without it, the bash command will timeout waiting for the server to exit
+- Server runs on http://localhost:3000
+- Use `ps aux | grep ts-node` to check if server is running
+- Use `curl -s -o /dev/null -w "%{http_code}" http://localhost:3000` to test server response
+
 **Note:** Railway deployment automatically runs `npm run build` via the postinstall hook.
 
 ## Architecture Overview
@@ -124,6 +131,48 @@ Before implementing ANY shared system:
 - [ ] Ensured shared resources regenerate appropriately for player count
 
 **FAILURE TO COMPLETE THIS ANALYSIS WILL RESULT IN FUNDAMENTAL DESIGN FLAWS REQUIRING MAJOR REWORK**
+
+## CRITICAL: Constraint Validation Protocol (MANDATORY)
+
+**Before proposing ANY solution to a problem, you MUST challenge all constraints:**
+
+### 1. Identify All Numerical Parameters
+- **Question**: "What numerical values or limits exist in the current system?"
+- **Requirement**: List all hardcoded numbers, sizing parameters, and limits
+- **Example**: `gridSize = 5`, `gridHeight = 4`, regeneration timers, resource caps
+
+### 2. Classify Constraints vs. Arbitrary Choices
+- **Question**: "Is this number a technical requirement or an arbitrary starting value?"
+- **Requirement**: Distinguish between real constraints (technical limits, UI bounds) and implementation choices
+- **Red Flag**: Treating initial development values as immutable constraints
+
+### 3. Scale Testing
+- **Question**: "What happens if I change this parameter by 2x, 5x, 10x?"
+- **Requirement**: Before proposing complex solutions, test if simple parameter scaling solves the problem
+- **Example**: If resource scarcity is the issue, can we just add more resources?
+
+### 4. Constraint Challenge Checklist
+Before implementing ANY solution:
+- [ ] Identified all numerical parameters affecting the problem
+- [ ] Verified which are real constraints vs. arbitrary choices  
+- [ ] Tested if scaling parameters solves the problem more simply
+- [ ] Confirmed proposed solution is simpler than parameter adjustment
+- [ ] Documented why parameter scaling was rejected (if applicable)
+
+**FAILURE TO CHALLENGE CONSTRAINTS WILL RESULT IN OVER-ENGINEERING SOLUTIONS TO ARTIFICIAL PROBLEMS**
+
+### 5. Extended Constraint Types to Challenge
+**Beyond numerical parameters, also question:**
+- **Technology choices**: Is the current tech stack required or just what was initially chosen?
+- **Architecture decisions**: Is client-server required or could P2P/other patterns work?
+- **File organization**: Is current structure required or just how someone organized it?
+- **UI/UX patterns**: Is current interface design required or just one implementation?
+- **Feature scope**: Are current game boundaries fixed or expandable?
+
+### 6. Root Cause Validation
+- **Always ask**: "Why does this problem exist in the first place?"
+- **Before complex solutions**: "Can we eliminate the root cause instead of treating symptoms?"
+- **Example**: Instead of "fix resource scarcity with complex algorithms," ask "why is there scarcity?"
 
 ## Key Implementation Details
 
