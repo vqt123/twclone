@@ -1,84 +1,105 @@
-const express = require('express');
-const http = require('http');
-const socketIo = require('socket.io');
-const path = require('path');
-const { v4: uuidv4 } = require('uuid');
+import express from 'express';
+import http from 'http';
+import { Server as SocketIOServer } from 'socket.io';
+import path from 'path';
+import { v4 as uuidv4 } from 'uuid';
+import {
+  Commodity,
+  ShipType,
+  PortType,
+  Action,
+  PlayerUpdateType,
+  TradeType,
+  TradeAction,
+  CommodityInfo,
+  ShipInfo,
+  PortInfo,
+  EnergyConfig,
+  Player,
+  Port,
+  Sector,
+  GameState,
+  PlayerJoinedData,
+  PlayerUpdateData,
+  TradeData,
+  TradeResultData,
+  PlayerTradedData
+} from './types';
 
 const app = express();
 const server = http.createServer(app);
-const io = socketIo(server);
+const io = new SocketIOServer(server);
 
 const PORT = process.env.PORT || 3000;
 
 app.use(express.static('public'));
 
-const commodities = {
-  ore: { name: 'Ore', basePrice: 50 },
-  food: { name: 'Food', basePrice: 30 },
-  equipment: { name: 'Equipment', basePrice: 100 }
+const commodities: { [key in Commodity]: CommodityInfo } = {
+  [Commodity.ORE]: { name: 'Ore', basePrice: 50 },
+  [Commodity.FOOD]: { name: 'Food', basePrice: 30 },
+  [Commodity.EQUIPMENT]: { name: 'Equipment', basePrice: 100 }
 };
 
-const shipTypes = {
-  scout: { 
+const shipTypes: { [key in ShipType]: ShipInfo } = {
+  [ShipType.SCOUT]: { 
     name: 'Scout Ship', 
     cargoCapacity: 10, 
-    energyEfficiency: 0.8, // Uses 80% energy for actions
+    energyEfficiency: 0.8,
     price: 0 
   },
-  trader: { 
+  [ShipType.TRADER]: { 
     name: 'Trader Vessel', 
     cargoCapacity: 30, 
-    energyEfficiency: 1.0, // Uses 100% energy for actions
+    energyEfficiency: 1.0,
     price: 5000 
   },
-  freighter: { 
+  [ShipType.FREIGHTER]: { 
     name: 'Heavy Freighter', 
     cargoCapacity: 50, 
-    energyEfficiency: 1.5, // Uses 150% energy for actions
+    energyEfficiency: 1.5,
     price: 15000 
   }
 };
 
-const energyConfig = {
+const energyConfig: EnergyConfig = {
   maxEnergy: 2400,
-  regenRate: 100, // energy per hour
-  regenInterval: 36000, // 36 seconds = 1/100th of an hour
+  regenRate: 100,
+  regenInterval: 36000,
   costs: {
-    move: 10,
-    trade: 5
+    [Action.MOVE]: 10,
+    [Action.TRADE]: 5
   }
 };
 
-const portTypes = {
-  mining: { buys: ['ore'], sells: ['equipment'], name: 'Mining Station' },
-  agricultural: { buys: ['food'], sells: ['ore'], name: 'Agricultural Port' },
-  industrial: { buys: ['equipment'], sells: ['food'], name: 'Industrial Complex' },
-  commercial: { buys: ['ore', 'food'], sells: ['equipment'], name: 'Commercial Hub' },
-  starport: { buys: ['ore', 'food', 'equipment'], sells: ['ore', 'food', 'equipment'], name: 'StarPort' }
+const portTypes: { [key in PortType]: PortInfo } = {
+  [PortType.MINING]: { buys: [Commodity.ORE], sells: [Commodity.EQUIPMENT], name: 'Mining Station' },
+  [PortType.AGRICULTURAL]: { buys: [Commodity.FOOD], sells: [Commodity.ORE], name: 'Agricultural Port' },
+  [PortType.INDUSTRIAL]: { buys: [Commodity.EQUIPMENT], sells: [Commodity.FOOD], name: 'Industrial Complex' },
+  [PortType.COMMERCIAL]: { buys: [Commodity.ORE, Commodity.FOOD], sells: [Commodity.EQUIPMENT], name: 'Commercial Hub' },
+  [PortType.STARPORT]: { buys: [Commodity.ORE, Commodity.FOOD, Commodity.EQUIPMENT], sells: [Commodity.ORE, Commodity.FOOD, Commodity.EQUIPMENT], name: 'StarPort' }
 };
 
-const gameState = {
+const gameState: GameState = {
   sectors: {},
   players: {},
   commodities: commodities,
   shipTypes: shipTypes
 };
 
-function generateSectors() {
-  const sectors = {};
-  const gridSize = 5; // 5x4 = 20 sectors
+function generateSectors(): { [key: number]: Sector } {
+  const sectors: { [key: number]: Sector } = {};
+  const gridSize = 5;
   const gridHeight = 4;
   
   for (let x = 0; x < gridSize; x++) {
     for (let y = 0; y < gridHeight; y++) {
       const sectorId = x * gridHeight + y + 1;
-      const connections = [];
+      const connections: number[] = [];
       
-      // Connect to adjacent sectors
-      if (x > 0) connections.push((x - 1) * gridHeight + y + 1); // Left
-      if (x < gridSize - 1) connections.push((x + 1) * gridHeight + y + 1); // Right
-      if (y > 0) connections.push(x * gridHeight + (y - 1) + 1); // Up
-      if (y < gridHeight - 1) connections.push(x * gridHeight + (y + 1) + 1); // Down
+      if (x > 0) connections.push((x - 1) * gridHeight + y + 1);
+      if (x < gridSize - 1) connections.push((x + 1) * gridHeight + y + 1);
+      if (y > 0) connections.push(x * gridHeight + (y - 1) + 1);
+      if (y < gridHeight - 1) connections.push(x * gridHeight + (y + 1) + 1);
       
       sectors[sectorId] = {
         id: sectorId,
@@ -95,12 +116,11 @@ function generateSectors() {
   return sectors;
 }
 
-function generatePorts(sectors) {
-  const portTypeKeys = Object.keys(portTypes);
-  const sectorIds = Object.keys(sectors);
+function generatePorts(sectors: { [key: number]: Sector }): void {
+  const portTypeKeys = Object.keys(portTypes) as PortType[];
+  const sectorIds = Object.keys(sectors).map(Number);
   
-  // Add 5 ports to random sectors
-  const portSectors = [];
+  const portSectors: number[] = [];
   while (portSectors.length < 5) {
     const randomSectorId = sectorIds[Math.floor(Math.random() * sectorIds.length)];
     if (!portSectors.includes(randomSectorId)) {
@@ -110,18 +130,19 @@ function generatePorts(sectors) {
   
   portSectors.forEach((sectorId, index) => {
     const portType = portTypeKeys[index % portTypeKeys.length];
-    const port = {
+    const portInfo = portTypes[portType];
+    
+    const port: Port = {
       type: portType,
-      name: portTypes[portType].name,
-      buys: portTypes[portType].buys,
-      sells: portTypes[portType].sells,
-      prices: {}
+      name: portInfo.name,
+      buys: portInfo.buys,
+      sells: portInfo.sells,
+      prices: {} as Port['prices']
     };
     
-    // Generate buy/sell prices with variation
-    Object.keys(commodities).forEach(commodity => {
+    Object.values(Commodity).forEach(commodity => {
       const basePrice = commodities[commodity].basePrice;
-      const variation = 0.2; // ±20% price variation
+      const variation = 0.2;
       const buyPrice = Math.round(basePrice * (0.8 + Math.random() * variation));
       const sellPrice = Math.round(basePrice * (1.2 + Math.random() * variation));
       
@@ -136,7 +157,7 @@ function generatePorts(sectors) {
   });
 }
 
-function updatePlayerEnergy(player) {
+function updatePlayerEnergy(player: Player): void {
   const now = Date.now();
   const timeDiff = now - player.lastEnergyUpdate;
   const energyToAdd = Math.floor(timeDiff / energyConfig.regenInterval);
@@ -147,13 +168,13 @@ function updatePlayerEnergy(player) {
   }
 }
 
-function consumeEnergy(player, action) {
+function consumeEnergy(player: Player, action: Action): boolean {
   updatePlayerEnergy(player);
   const ship = shipTypes[player.ship];
   const energyCost = Math.ceil(energyConfig.costs[action] * ship.energyEfficiency);
   
   if (player.energy < energyCost) {
-    return false; // Not enough energy
+    return false;
   }
   
   player.energy -= energyCost;
@@ -167,19 +188,19 @@ io.on('connection', (socket) => {
   console.log('Player connected:', socket.id);
   
   const playerId = uuidv4();
-  const player = {
+  const player: Player = {
     id: playerId,
     socketId: socket.id,
     name: `Player${Math.floor(Math.random() * 1000)}`,
     currentSector: 1,
     credits: 1000,
     inventory: {
-      ore: 0,
-      food: 0,
-      equipment: 0
+      [Commodity.ORE]: 0,
+      [Commodity.FOOD]: 0,
+      [Commodity.EQUIPMENT]: 0
     },
-    ship: 'scout',
-    cargoCapacity: shipTypes.scout.cargoCapacity,
+    ship: ShipType.SCOUT,
+    cargoCapacity: shipTypes[ShipType.SCOUT].cargoCapacity,
     cargoUsed: 0,
     energy: energyConfig.maxEnergy,
     lastEnergyUpdate: Date.now()
@@ -188,25 +209,28 @@ io.on('connection', (socket) => {
   gameState.players[playerId] = player;
   gameState.sectors[1].players.push(playerId);
   
-  socket.emit('playerJoined', { 
+  const joinData: PlayerJoinedData = {
     playerId: playerId,
     player: player,
     sectors: gameState.sectors,
     commodities: gameState.commodities,
     shipTypes: gameState.shipTypes
-  });
+  };
   
-  socket.broadcast.emit('playerUpdate', {
-    type: 'joined',
+  socket.emit('playerJoined', joinData);
+  
+  const updateData: PlayerUpdateData = {
+    type: PlayerUpdateType.JOINED,
     player: player,
     sectors: gameState.sectors
-  });
+  };
   
-  socket.on('moveTo', (targetSectorId) => {
+  socket.broadcast.emit('playerUpdate', updateData);
+  
+  socket.on('moveTo', (targetSectorId: number) => {
     const player = Object.values(gameState.players).find(p => p.socketId === socket.id);
     if (!player) return;
     
-    // Update energy before checking if move is possible
     updatePlayerEnergy(player);
     
     const currentSector = gameState.sectors[player.currentSector];
@@ -217,34 +241,30 @@ io.on('connection', (socket) => {
       return;
     }
     
-    // Check if player has enough energy to move
-    if (!consumeEnergy(player, 'move')) {
+    if (!consumeEnergy(player, Action.MOVE)) {
       socket.emit('error', 'Not enough energy to move');
       return;
     }
     
-    // Remove player from current sector
     currentSector.players = currentSector.players.filter(id => id !== player.id);
-    
-    // Add player to target sector
     player.currentSector = targetSectorId;
     targetSector.players.push(player.id);
     
-    // Notify all players
-    io.emit('playerUpdate', {
-      type: 'moved',
+    const moveUpdateData: PlayerUpdateData = {
+      type: PlayerUpdateType.MOVED,
       player: player,
       sectors: gameState.sectors
-    });
+    };
+    
+    io.emit('playerUpdate', moveUpdateData);
   });
 
-  socket.on('buyItem', (data) => {
+  socket.on('buyItem', (data: TradeData) => {
     const player = Object.values(gameState.players).find(p => p.socketId === socket.id);
     if (!player) return;
     
-    // Update energy and check if player has enough for trading
     updatePlayerEnergy(player);
-    if (!consumeEnergy(player, 'trade')) {
+    if (!consumeEnergy(player, Action.TRADE)) {
       socket.emit('error', 'Not enough energy to trade');
       return;
     }
@@ -257,7 +277,7 @@ io.on('connection', (socket) => {
       return;
     }
     
-    const price = port.prices[data.commodity].sell;
+    const price = port.prices[data.commodity].sell!;
     const quantity = data.quantity || 1;
     const totalCost = price * quantity;
     
@@ -271,36 +291,37 @@ io.on('connection', (socket) => {
       return;
     }
     
-    // Execute trade
     player.credits -= totalCost;
     player.inventory[data.commodity] += quantity;
     player.cargoUsed += quantity;
     
-    socket.emit('tradeResult', {
-      type: 'buy',
+    const tradeResult: TradeResultData = {
+      type: TradeType.BUY,
       commodity: data.commodity,
       quantity: quantity,
       price: price,
       totalCost: totalCost,
       player: player
-    });
+    };
     
-    // Notify other players in sector
-    socket.to(currentSector.id).emit('playerTraded', {
+    socket.emit('tradeResult', tradeResult);
+    
+    const tradeNotification: PlayerTradedData = {
       playerName: player.name,
-      type: 'bought',
+      type: TradeAction.BOUGHT,
       commodity: data.commodity,
       quantity: quantity
-    });
+    };
+    
+    socket.to(currentSector.id.toString()).emit('playerTraded', tradeNotification);
   });
 
-  socket.on('sellItem', (data) => {
+  socket.on('sellItem', (data: TradeData) => {
     const player = Object.values(gameState.players).find(p => p.socketId === socket.id);
     if (!player) return;
     
-    // Update energy and check if player has enough for trading
     updatePlayerEnergy(player);
-    if (!consumeEnergy(player, 'trade')) {
+    if (!consumeEnergy(player, Action.TRADE)) {
       socket.emit('error', 'Not enough energy to trade');
       return;
     }
@@ -319,30 +340,32 @@ io.on('connection', (socket) => {
       return;
     }
     
-    const price = port.prices[data.commodity].buy;
+    const price = port.prices[data.commodity].buy!;
     const totalEarned = price * quantity;
     
-    // Execute trade
     player.credits += totalEarned;
     player.inventory[data.commodity] -= quantity;
     player.cargoUsed -= quantity;
     
-    socket.emit('tradeResult', {
-      type: 'sell',
+    const tradeResult: TradeResultData = {
+      type: TradeType.SELL,
       commodity: data.commodity,
       quantity: quantity,
       price: price,
       totalEarned: totalEarned,
       player: player
-    });
+    };
     
-    // Notify other players in sector
-    socket.to(currentSector.id).emit('playerTraded', {
+    socket.emit('tradeResult', tradeResult);
+    
+    const tradeNotification: PlayerTradedData = {
       playerName: player.name,
-      type: 'sold',
+      type: TradeAction.SOLD,
       commodity: data.commodity,
       quantity: quantity
-    });
+    };
+    
+    socket.to(currentSector.id.toString()).emit('playerTraded', tradeNotification);
   });
   
   socket.on('disconnect', () => {
@@ -350,7 +373,6 @@ io.on('connection', (socket) => {
     
     const player = Object.values(gameState.players).find(p => p.socketId === socket.id);
     if (player) {
-      // Remove player from sector
       const sector = gameState.sectors[player.currentSector];
       if (sector) {
         sector.players = sector.players.filter(id => id !== player.id);
@@ -358,11 +380,13 @@ io.on('connection', (socket) => {
       
       delete gameState.players[player.id];
       
-      socket.broadcast.emit('playerUpdate', {
-        type: 'left',
+      const leaveUpdateData: PlayerUpdateData = {
+        type: PlayerUpdateType.LEFT,
         player: player,
         sectors: gameState.sectors
-      });
+      };
+      
+      socket.broadcast.emit('playerUpdate', leaveUpdateData);
     }
   });
 });
