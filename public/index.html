@@ -70,6 +70,23 @@
             background-color: #111100;
         }
         
+        .sector.route {
+            border-color: #ff6600;
+            background-color: #331100;
+        }
+        
+        .sector.route.next-step {
+            border-color: #ffaa00;
+            background-color: #442200;
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 170, 0, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 170, 0, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 170, 0, 0); }
+        }
+        
         .player-info {
             flex: 1;
             border: 2px solid #00ff00;
@@ -298,6 +315,9 @@
                 <div class="connections">
                     <h4>Available Warps:</h4>
                     <div id="connectionButtons"></div>
+                    <div id="autoNavControls" style="display: none; margin-top: 10px;">
+                        <button id="cancelNavButton" class="connection-button" style="background-color: #660000; border-color: #ff0000;">Cancel Auto-Navigation</button>
+                    </div>
                 </div>
             </div>
             
@@ -390,6 +410,14 @@
                     sectorDiv.classList.add('current');
                 }
                 
+                // Highlight route if auto-navigating
+                if (autoNavigating && currentPath.includes(i)) {
+                    sectorDiv.classList.add('route');
+                    if (currentPath[0] === i) {
+                        sectorDiv.classList.add('next-step');
+                    }
+                }
+                
                 const playerCount = sector.players ? sector.players.length : 0;
                 sectorDiv.innerHTML = `
                     <strong>${sector.name}</strong><br>
@@ -398,9 +426,18 @@
                 
                 sectorDiv.addEventListener('click', () => {
                     if (gameState.player && gameState.player.currentSector !== i) {
+                        // Check if already auto-navigating
+                        if (autoNavigating) {
+                            cancelAutoNavigation();
+                        }
+                        
                         const currentSector = gameState.sectors[gameState.player.currentSector];
                         if (currentSector && currentSector.connections.includes(i)) {
+                            // Direct connection - move immediately
                             socket.emit('moveTo', i);
+                        } else {
+                            // Need pathfinding - start auto-navigation
+                            startAutoNavigation(i);
                         }
                     }
                 });
@@ -588,6 +625,83 @@
             socket.emit('upgradeShip', { shipType: shipType });
         }
 
+        // Pathfinding system
+        let currentPath = [];
+        let autoNavigating = false;
+
+        function findPath(startSector, targetSector) {
+            if (startSector === targetSector) return [startSector];
+            
+            const queue = [{sector: startSector, path: [startSector]}];
+            const visited = new Set();
+            
+            while (queue.length > 0) {
+                const {sector, path} = queue.shift();
+                
+                if (visited.has(sector)) continue;
+                visited.add(sector);
+                
+                const sectorObj = gameState.sectors[sector];
+                if (!sectorObj) continue;
+                
+                for (const connectedSector of sectorObj.connections) {
+                    if (connectedSector === targetSector) {
+                        return [...path, connectedSector];
+                    }
+                    
+                    if (!visited.has(connectedSector)) {
+                        queue.push({
+                            sector: connectedSector, 
+                            path: [...path, connectedSector]
+                        });
+                    }
+                }
+            }
+            
+            return null; // No path found
+        }
+
+        function startAutoNavigation(targetSector) {
+            if (!gameState.player) return;
+            
+            const path = findPath(gameState.player.currentSector, targetSector);
+            if (!path || path.length <= 1) {
+                log(`No route to Sector ${targetSector}`);
+                return;
+            }
+            
+            currentPath = path.slice(1); // Remove current sector
+            autoNavigating = true;
+            log(`Auto-navigating to Sector ${targetSector} (${currentPath.length} jumps)`);
+            
+            // Show cancel button
+            document.getElementById('autoNavControls').style.display = 'block';
+            
+            // Start navigation
+            continueAutoNavigation();
+        }
+
+        function continueAutoNavigation() {
+            if (!autoNavigating || currentPath.length === 0) {
+                autoNavigating = false;
+                currentPath = [];
+                document.getElementById('autoNavControls').style.display = 'none';
+                updateSectorMap(); // Clear route highlighting
+                return;
+            }
+            
+            const nextSector = currentPath.shift();
+            socket.emit('moveTo', nextSector);
+        }
+
+        function cancelAutoNavigation() {
+            autoNavigating = false;
+            currentPath = [];
+            document.getElementById('autoNavControls').style.display = 'none';
+            log('Auto-navigation cancelled');
+            updateSectorMap(); // Clear route highlighting
+        }
+
         // Socket event handlers
         socket.on('playerJoined', (data) => {
             gameState.player = data.player;
@@ -623,6 +737,10 @@
                 case 'moved':
                     if (data.player.id === gameState.player?.id) {
                         log(`You warped to ${gameState.sectors[data.player.currentSector].name}`);
+                        // Continue auto-navigation if in progress
+                        if (autoNavigating) {
+                            setTimeout(() => continueAutoNavigation(), 500); // Small delay for better UX
+                        }
                     } else {
                         log(`${data.player.name} warped to ${gameState.sectors[data.player.currentSector].name}`);
                     }
@@ -666,6 +784,9 @@
                 updatePlayerInfo();
             }
         }, 10000);
+
+        // Set up cancel button
+        document.getElementById('cancelNavButton').addEventListener('click', cancelAutoNavigation);
 
         log('Connecting to TradeWars server...');
     </script>

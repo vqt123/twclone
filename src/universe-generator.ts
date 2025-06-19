@@ -58,13 +58,26 @@ export function generatePorts(sectors: { [key: number]: Sector }): void {
     Object.values(commodities).forEach((commodityInfo, commodityIndex) => {
       const commodity = Object.keys(commodities)[commodityIndex] as keyof typeof commodities;
       const basePrice = commodityInfo.basePrice;
-      const variation = 0.2;
-      const buyPrice = Math.round(basePrice * (0.8 + Math.random() * variation));
-      const sellPrice = Math.round(basePrice * (1.2 + Math.random() * variation));
+      
+      // NEW PROFITABLE PRICING SYSTEM
+      // Ports that SELL (player buys): 70-90% of base price (cheaper)
+      // Ports that BUY (player sells): 110-130% of base price (more expensive)
+      // This ensures 20-60% profit margins!
+      
+      const sellVariation = 0.2; // 70-90% for selling to player
+      const buyVariation = 0.2;  // 110-130% for buying from player
+      
+      const sellPrice = port.sells.includes(commodity) 
+        ? Math.round(basePrice * (0.7 + Math.random() * sellVariation))  // 70-90%
+        : null;
+        
+      const buyPrice = port.buys.includes(commodity)
+        ? Math.round(basePrice * (1.1 + Math.random() * buyVariation))   // 110-130%
+        : null;
       
       port.prices[commodity] = {
-        buy: port.buys.includes(commodity) ? buyPrice : null,
-        sell: port.sells.includes(commodity) ? sellPrice : null
+        buy: buyPrice,   // What port pays player (higher)
+        sell: sellPrice  // What player pays port (lower)
       };
     });
     
