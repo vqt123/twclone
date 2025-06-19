@@ -20,6 +20,39 @@ Create a modern, real-time multiplayer space trading game inspired by the classi
 
 ---
 
+## ⚠️ CRITICAL: Multiplayer Systems Design Requirements
+
+**All future feature development MUST include this mandatory analysis to prevent fundamental design flaws:**
+
+### Required Analysis Before Implementation
+
+#### 1. Multi-Player Resource Contention Modeling
+- **Model worst-case scenarios**: What happens when 10+ players compete for shared resources?
+- **Identify depletion patterns**: How do shared resources behave under realistic player load?
+- **Validate resource regeneration**: Ensure regeneration timelines work for asynchronous play
+
+#### 2. Player Schedule Impact Analysis  
+- **Map different login patterns**: Early morning vs. evening vs. late night players
+- **Verify equal opportunity**: Player #10 logging in at hour 23 must have engaging gameplay
+- **Eliminate time-based advantages**: No player should gain unfair advantage due to login timing
+
+#### 3. Long-Term Equilibrium Assessment
+- **Strategy convergence analysis**: What happens when all players discover optimal strategies?
+- **Meaningful choice preservation**: Ensure decisions remain interesting even with perfect information
+- **Engagement sustainability**: Verify gameplay remains fun after 100+ community play sessions
+
+#### 4. Implementation Gate Requirements
+**No multiplayer feature can be implemented without:**
+- [ ] Completed resource contention analysis with realistic player counts
+- [ ] Verified that different play schedules don't create unfair advantages
+- [ ] Confirmed late-arriving players have meaningful gameplay options
+- [ ] Validated that optimal strategies remain engaging when universally known
+- [ ] Ensured shared systems scale appropriately with player base
+
+**Example of this process catching critical flaws:** The current 24-hour trading post regeneration system creates a situation where most players log in to find all posts depleted by earlier players, making the game unplayable for 80%+ of the player base.
+
+---
+
 ## Development Priorities (Based on Playtesting Feedback)
 
 ### Phase 1: Core System Refinement (IMMEDIATE PRIORITY)

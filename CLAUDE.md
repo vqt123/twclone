@@ -96,6 +96,35 @@ Base prices (Ore: 50, Food: 30, Equipment: 100) with ±20% random variation per 
 - Only handle exceptions for scenarios truly outside our control (network failures, user input)
 - Fix root causes rather than patching symptoms with defensive code
 
+## CRITICAL: Multiplayer Systems Analysis (MANDATORY)
+
+**Before implementing ANY multiplayer mechanic, you MUST complete this analysis:**
+
+### 1. Resource Contention Analysis
+- **Question**: "What happens when 10+ players compete for this shared resource?"
+- **Requirement**: Model worst-case depletion scenarios
+- **Example**: If trading posts take 24 hours to regenerate and efficiency is shared, most players will log in to find everything depleted by earlier players
+
+### 2. Asynchronous Play Patterns
+- **Question**: "Map player experiences across different login times"
+- **Requirement**: Verify that Player #10 logging in at hour 23 still has engaging gameplay
+- **Red Flag**: If only players who log in at specific times get good experiences
+
+### 3. Long-term Equilibrium State
+- **Question**: "What does the game look like after 100+ player sessions?"
+- **Requirement**: Confirm the game remains engaging when all players know optimal strategies
+- **Red Flag**: If all players converge on identical optimal strategies with no meaningful choices
+
+### 4. Multiplayer Systems Validation Checklist
+Before implementing ANY shared system:
+- [ ] Modeled resource depletion under realistic player load
+- [ ] Verified different play schedules don't create unfair advantages  
+- [ ] Confirmed "late arriving" players still have meaningful gameplay
+- [ ] Tested that optimal strategies remain fun when everyone discovers them
+- [ ] Ensured shared resources regenerate appropriately for player count
+
+**FAILURE TO COMPLETE THIS ANALYSIS WILL RESULT IN FUNDAMENTAL DESIGN FLAWS REQUIRING MAJOR REWORK**
+
 ## Key Implementation Details
 
 When modifying game mechanics, ensure energy costs are validated before actions and that all string literals use the appropriate enums from `types.ts`. The frontend automatically updates energy display every 10 seconds and synchronizes with server state changes.
