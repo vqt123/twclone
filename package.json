@@ -16,6 +16,12 @@
     "nodemon": "^3.0.2"
   },
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
+  "keywords": ["tradewars", "multiplayer", "websocket", "space", "trading"],
+  "repository": {
+    "type": "git",
+    "url": "."
   }
 }
