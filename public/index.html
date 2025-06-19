@@ -37,7 +37,7 @@
         
         .sector-grid {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
+            grid-template-columns: repeat(7, 1fr);
             gap: 10px;
             margin-bottom: 20px;
         }
@@ -307,7 +307,10 @@
         
         <div class="game-area">
             <div class="sector-map">
-                <h3>Sector Map</h3>
+                <h3>Local Scanner</h3>
+                <div style="font-size: 12px; color: #aaa; margin-bottom: 10px;">
+                    <span id="currentSectorInfo">Sector ? of 2500</span> | Range: 3 sectors
+                </div>
                 <div class="sector-grid" id="sectorGrid">
                     <!-- Sectors will be generated here -->
                 </div>
@@ -315,6 +318,14 @@
                 <div class="connections">
                     <h4>Available Warps:</h4>
                     <div id="connectionButtons"></div>
+                    
+                    <div style="margin-top: 15px;">
+                        <h4>Direct Navigation:</h4>
+                        <input type="number" id="jumpToSector" placeholder="Enter sector #" min="1" max="2500" 
+                               style="background-color: #001100; color: #00ff00; border: 1px solid #006600; padding: 5px; width: 120px; font-family: inherit;">
+                        <button id="jumpButton" class="connection-button" style="margin-left: 5px;">Jump</button>
+                    </div>
+                    
                     <div id="autoNavControls" style="display: none; margin-top: 10px;">
                         <button id="cancelNavButton" class="connection-button" style="background-color: #660000; border-color: #ff0000;">Cancel Auto-Navigation</button>
                     </div>
@@ -382,57 +393,112 @@
             logDiv.scrollTop = logDiv.scrollHeight;
         }
 
+        function getLocalSectors(currentSectorId, range = 3) {
+            const localSectors = [];
+            const currentSector = gameState.sectors[currentSectorId];
+            if (!currentSector) return [];
+            
+            const gridSize = 50;
+            const currentX = currentSector.x;
+            const currentY = currentSector.y;
+            
+            for (let dx = -range; dx <= range; dx++) {
+                for (let dy = -range; dy <= range; dy++) {
+                    const x = currentX + dx;
+                    const y = currentY + dy;
+                    
+                    if (x >= 0 && x < gridSize && y >= 0 && y < gridSize) {
+                        const sectorId = x * gridSize + y + 1;
+                        if (gameState.sectors[sectorId]) {
+                            localSectors.push(sectorId);
+                        }
+                    }
+                }
+            }
+            
+            return localSectors;
+        }
+
         function updateSectorMap() {
             const grid = document.getElementById('sectorGrid');
             grid.innerHTML = '';
             
-            for (let i = 1; i <= 20; i++) {
-                const sector = gameState.sectors[i];
-                if (!sector) continue;
-                
-                const sectorDiv = document.createElement('div');
-                sectorDiv.className = 'sector';
-                sectorDiv.id = `sector-${i}`;
-                
-                if (gameState.player && gameState.player.currentSector === i) {
-                    sectorDiv.classList.add('current');
-                }
-                
-                // Highlight route if auto-navigating
-                if (autoNavigating && currentPath.includes(i)) {
-                    sectorDiv.classList.add('route');
-                    if (currentPath[0] === i) {
-                        sectorDiv.classList.add('next-step');
-                    }
-                }
-                
-                const playerCount = sector.players ? sector.players.length : 0;
-                const tradingPostInfo = sector.tradingPost ? `<br><small style="color: #ffaa00;">Trading Post</small>` : '';
-                sectorDiv.innerHTML = `
-                    <strong>${sector.name}</strong><br>
-                    <small>Players: ${playerCount}</small>
-                    ${tradingPostInfo}
-                `;
-                
-                sectorDiv.addEventListener('click', () => {
-                    if (gameState.player && gameState.player.currentSector !== i) {
-                        // Check if already auto-navigating
-                        if (autoNavigating) {
-                            cancelAutoNavigation();
-                        }
+            if (!gameState.player) return;
+            
+            const currentSector = gameState.sectors[gameState.player.currentSector];
+            if (!currentSector) return;
+            
+            const range = 3;
+            const gridSize = 50;
+            const currentX = currentSector.x;
+            const currentY = currentSector.y;
+            
+            // Create 7x7 grid centered on current position
+            for (let dy = -range; dy <= range; dy++) {
+                for (let dx = -range; dx <= range; dx++) {
+                    const x = currentX + dx;
+                    const y = currentY + dy;
+                    
+                    let sectorDiv = document.createElement('div');
+                    sectorDiv.className = 'sector';
+                    
+                    if (x >= 0 && x < gridSize && y >= 0 && y < gridSize) {
+                        const sectorId = x * gridSize + y + 1;
+                        const sector = gameState.sectors[sectorId];
                         
-                        const currentSector = gameState.sectors[gameState.player.currentSector];
-                        if (currentSector && currentSector.connections.includes(i)) {
-                            // Direct connection - move immediately
-                            socket.emit('moveTo', i);
+                        if (sector) {
+                            sectorDiv.id = `sector-${sectorId}`;
+                            
+                            if (gameState.player && gameState.player.currentSector === sectorId) {
+                                sectorDiv.classList.add('current');
+                            }
+                            
+                            // Highlight route if auto-navigating
+                            if (autoNavigating && currentPath.includes(sectorId)) {
+                                sectorDiv.classList.add('route');
+                                if (currentPath[0] === sectorId) {
+                                    sectorDiv.classList.add('next-step');
+                                }
+                            }
+                            
+                            const playerCount = sector.players ? sector.players.length : 0;
+                            const tradingPostInfo = sector.tradingPost ? `<br><small style="color: #ffaa00;">Trading Post</small>` : '';
+                            sectorDiv.innerHTML = `
+                                <strong>${sectorId}</strong><br>
+                                <small>Players: ${playerCount}</small>
+                                ${tradingPostInfo}
+                            `;
+                            
+                            sectorDiv.addEventListener('click', () => {
+                                if (gameState.player && gameState.player.currentSector !== sectorId) {
+                                    // Check if already auto-navigating
+                                    if (autoNavigating) {
+                                        cancelAutoNavigation();
+                                    }
+                                    
+                                    const currentSectorObj = gameState.sectors[gameState.player.currentSector];
+                                    if (currentSectorObj && currentSectorObj.connections.includes(sectorId)) {
+                                        // Direct connection - move immediately
+                                        socket.emit('moveTo', sectorId);
+                                    } else {
+                                        // Need pathfinding - start auto-navigation
+                                        startAutoNavigation(sectorId);
+                                    }
+                                }
+                            });
                         } else {
-                            // Need pathfinding - start auto-navigation
-                            startAutoNavigation(i);
+                            // Empty space
+                            sectorDiv.style.opacity = '0.3';
+                            sectorDiv.innerHTML = '<small>---</small>';
                         }
+                    } else {
+                        // Outside universe bounds
+                        sectorDiv.style.opacity = '0.1';
+                        sectorDiv.innerHTML = '<small>VOID</small>';
                     }
-                });
-                
-                grid.appendChild(sectorDiv);
+                    
+                    grid.appendChild(sectorDiv);
+                }
             }
             
             updateConnections();
@@ -464,6 +530,9 @@
             document.getElementById('playerName').textContent = gameState.player.name;
             document.getElementById('playerCredits').textContent = gameState.player.credits;
             document.getElementById('currentSector').textContent = gameState.player.currentSector;
+            
+            // Update sector info display
+            document.getElementById('currentSectorInfo').textContent = `Sector ${gameState.player.currentSector} of 2500`;
             
             // Update ship and energy info
             if (gameState.player.ship && gameState.shipTypes) {
@@ -747,6 +816,46 @@
 
         // Set up cancel button
         document.getElementById('cancelNavButton').addEventListener('click', cancelAutoNavigation);
+
+        // Set up jump button
+        function jumpToSector() {
+            const targetSector = parseInt(document.getElementById('jumpToSector').value);
+            if (!targetSector || targetSector < 1 || targetSector > 2500) {
+                log('Invalid sector number. Enter 1-2500');
+                return;
+            }
+            
+            if (!gameState.player) {
+                log('Wait for game to load');
+                return;
+            }
+            
+            if (targetSector === gameState.player.currentSector) {
+                log('Already in that sector');
+                return;
+            }
+            
+            if (!gameState.sectors[targetSector]) {
+                log('Sector not found');
+                return;
+            }
+            
+            // Cancel existing navigation
+            if (autoNavigating) {
+                cancelAutoNavigation();
+            }
+            
+            // Start auto-navigation to target sector
+            startAutoNavigation(targetSector);
+            document.getElementById('jumpToSector').value = '';
+        }
+        
+        document.getElementById('jumpButton').addEventListener('click', jumpToSector);
+        document.getElementById('jumpToSector').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                jumpToSector();
+            }
+        });
 
         log('Connecting to TradeWars server...');
     </script>
