@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TradeWars Clone</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background-color: #000;
+            color: #00ff00;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .game-area {
+            display: flex;
+            gap: 30px;
+        }
+        
+        .sector-map {
+            flex: 2;
+            border: 2px solid #00ff00;
+            padding: 20px;
+            min-height: 400px;
+        }
+        
+        .sector-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .sector {
+            border: 1px solid #006600;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .sector:hover {
+            border-color: #00ff00;
+            background-color: #001100;
+        }
+        
+        .sector.current {
+            background-color: #003300;
+            border-color: #00ff00;
+            border-width: 2px;
+        }
+        
+        .sector.connected {
+            border-color: #ffff00;
+            cursor: pointer;
+        }
+        
+        .sector.connected:hover {
+            background-color: #111100;
+        }
+        
+        .player-info {
+            flex: 1;
+            border: 2px solid #00ff00;
+            padding: 20px;
+        }
+        
+        .status {
+            margin-bottom: 20px;
+        }
+        
+        .players-list {
+            margin-top: 20px;
+        }
+        
+        .player-item {
+            padding: 5px;
+            margin: 2px 0;
+            background-color: #002200;
+        }
+        
+        .connections {
+            margin-top: 20px;
+        }
+        
+        .connection-button {
+            background-color: #003300;
+            color: #00ff00;
+            border: 1px solid #00ff00;
+            padding: 5px 10px;
+            margin: 2px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        
+        .connection-button:hover {
+            background-color: #005500;
+        }
+        
+        .log {
+            margin-top: 20px;
+            border: 1px solid #006600;
+            padding: 10px;
+            height: 150px;
+            overflow-y: auto;
+            font-size: 12px;
+        }
+        
+        .log-entry {
+            margin: 2px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>TRADEWARS 2025</h1>
+            <p>Real-time Space Trading Game</p>
+        </div>
+        
+        <div class="game-area">
+            <div class="sector-map">
+                <h3>Sector Map</h3>
+                <div class="sector-grid" id="sectorGrid">
+                    <!-- Sectors will be generated here -->
+                </div>
+                
+                <div class="connections">
+                    <h4>Available Warps:</h4>
+                    <div id="connectionButtons"></div>
+                </div>
+            </div>
+            
+            <div class="player-info">
+                <h3>Player Status</h3>
+                <div class="status">
+                    <div>Name: <span id="playerName">-</span></div>
+                    <div>Credits: <span id="playerCredits">-</span></div>
+                    <div>Current Sector: <span id="currentSector">-</span></div>
+                </div>
+                
+                <div class="players-list">
+                    <h4>Players in Sector:</h4>
+                    <div id="playersInSector">None</div>
+                </div>
+                
+                <div class="log">
+                    <h4>Game Log</h4>
+                    <div id="gameLog"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        let gameState = {
+            player: null,
+            sectors: {},
+            players: {}
+        };
+
+        function log(message) {
+            const logDiv = document.getElementById('gameLog');
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function updateSectorMap() {
+            const grid = document.getElementById('sectorGrid');
+            grid.innerHTML = '';
+            
+            for (let i = 1; i <= 20; i++) {
+                const sector = gameState.sectors[i];
+                if (!sector) continue;
+                
+                const sectorDiv = document.createElement('div');
+                sectorDiv.className = 'sector';
+                sectorDiv.id = `sector-${i}`;
+                
+                if (gameState.player && gameState.player.currentSector === i) {
+                    sectorDiv.classList.add('current');
+                }
+                
+                const playerCount = sector.players ? sector.players.length : 0;
+                sectorDiv.innerHTML = `
+                    <strong>${sector.name}</strong><br>
+                    <small>Players: ${playerCount}</small>
+                `;
+                
+                sectorDiv.addEventListener('click', () => {
+                    if (gameState.player && gameState.player.currentSector !== i) {
+                        const currentSector = gameState.sectors[gameState.player.currentSector];
+                        if (currentSector && currentSector.connections.includes(i)) {
+                            socket.emit('moveTo', i);
+                        }
+                    }
+                });
+                
+                grid.appendChild(sectorDiv);
+            }
+            
+            updateConnections();
+        }
+
+        function updateConnections() {
+            const connectionsDiv = document.getElementById('connectionButtons');
+            connectionsDiv.innerHTML = '';
+            
+            if (!gameState.player) return;
+            
+            const currentSector = gameState.sectors[gameState.player.currentSector];
+            if (!currentSector) return;
+            
+            currentSector.connections.forEach(sectorId => {
+                const button = document.createElement('button');
+                button.className = 'connection-button';
+                button.textContent = `Warp to Sector ${sectorId}`;
+                button.addEventListener('click', () => {
+                    socket.emit('moveTo', sectorId);
+                });
+                connectionsDiv.appendChild(button);
+            });
+        }
+
+        function updatePlayerInfo() {
+            if (!gameState.player) return;
+            
+            document.getElementById('playerName').textContent = gameState.player.name;
+            document.getElementById('playerCredits').textContent = gameState.player.credits;
+            document.getElementById('currentSector').textContent = gameState.player.currentSector;
+            
+            const currentSector = gameState.sectors[gameState.player.currentSector];
+            const playersDiv = document.getElementById('playersInSector');
+            
+            if (currentSector && currentSector.players && currentSector.players.length > 0) {
+                playersDiv.innerHTML = '';
+                currentSector.players.forEach(playerId => {
+                    const player = Object.values(gameState.players).find(p => p.id === playerId);
+                    if (player) {
+                        const playerDiv = document.createElement('div');
+                        playerDiv.className = 'player-item';
+                        playerDiv.textContent = player.name;
+                        playersDiv.appendChild(playerDiv);
+                    }
+                });
+            } else {
+                playersDiv.textContent = 'None';
+            }
+        }
+
+        // Socket event handlers
+        socket.on('playerJoined', (data) => {
+            gameState.player = data.player;
+            gameState.sectors = data.sectors;
+            gameState.players[data.player.id] = data.player;
+            
+            log(`Welcome to TradeWars! You are ${data.player.name}`);
+            log(`Starting in ${gameState.sectors[data.player.currentSector].name}`);
+            
+            updateSectorMap();
+            updatePlayerInfo();
+        });
+
+        socket.on('playerUpdate', (data) => {
+            gameState.sectors = data.sectors;
+            
+            if (data.player.id === gameState.player?.id) {
+                gameState.player = data.player;
+            }
+            
+            gameState.players[data.player.id] = data.player;
+            
+            switch (data.type) {
+                case 'joined':
+                    log(`${data.player.name} joined the game`);
+                    break;
+                case 'left':
+                    log(`${data.player.name} left the game`);
+                    delete gameState.players[data.player.id];
+                    break;
+                case 'moved':
+                    if (data.player.id === gameState.player?.id) {
+                        log(`You warped to ${gameState.sectors[data.player.currentSector].name}`);
+                    } else {
+                        log(`${data.player.name} warped to ${gameState.sectors[data.player.currentSector].name}`);
+                    }
+                    break;
+            }
+            
+            updateSectorMap();
+            updatePlayerInfo();
+        });
+
+        socket.on('error', (message) => {
+            log(`ERROR: ${message}`);
+        });
+
+        log('Connecting to TradeWars server...');
+    </script>
+</body>
+</html>
