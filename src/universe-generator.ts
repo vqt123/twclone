@@ -35,16 +35,50 @@ export function generateTradingPosts(sectors: { [key: number]: Sector }): void {
   const tradingPostTypes = Object.keys(tradingPosts) as TradingPostType[];
   const sectorIds = Object.keys(sectors).map(Number);
   
+  // Generate 9 trading posts (45% coverage) with better distribution
+  const targetPostCount = 9;
   const tradingPostSectors: number[] = [];
-  while (tradingPostSectors.length < 5) {
+  
+  // First, ensure we have at least one of each type (5 posts)
+  while (tradingPostSectors.length < tradingPostTypes.length) {
     const randomSectorId = sectorIds[Math.floor(Math.random() * sectorIds.length)];
     if (!tradingPostSectors.includes(randomSectorId)) {
       tradingPostSectors.push(randomSectorId);
     }
   }
   
+  // Then add 4 more posts with weighted selection for variety
+  const weightedTypes = [
+    TradingPostType.COMMERCIAL,  // Add more high-value posts
+    TradingPostType.STARPORT,    // More ship upgrade opportunities  
+    TradingPostType.INDUSTRIAL,  // Good mid-tier profits
+    TradingPostType.MINING       // Balance with lower-tier
+  ];
+  
+  for (let i = 0; i < targetPostCount - tradingPostTypes.length; i++) {
+    let attempts = 0;
+    while (attempts < 50) { // Prevent infinite loop
+      const randomSectorId = sectorIds[Math.floor(Math.random() * sectorIds.length)];
+      if (!tradingPostSectors.includes(randomSectorId)) {
+        tradingPostSectors.push(randomSectorId);
+        break;
+      }
+      attempts++;
+    }
+  }
+  
+  // Create trading posts with type distribution
   tradingPostSectors.forEach((sectorId, index) => {
-    const postType = tradingPostTypes[index % tradingPostTypes.length];
+    let postType: TradingPostType;
+    
+    if (index < tradingPostTypes.length) {
+      // First 5 posts: one of each type
+      postType = tradingPostTypes[index];
+    } else {
+      // Additional posts: use weighted selection
+      postType = weightedTypes[(index - tradingPostTypes.length) % weightedTypes.length];
+    }
+    
     const postInfo = tradingPosts[postType];
     
     const tradingPost: TradingPost = {
