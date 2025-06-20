@@ -34,6 +34,10 @@ export class AnalysisBot {
   private actionCooldown: number = 1000; // 1 second between actions
   private testMode: boolean = false;
   private lastTradeProfit: number = 0;
+  private failedNavigationAttempts: number = 0;
+  private consecutiveNoTradeScans: number = 0;
+  private autoNavigating: boolean = false;
+  private currentPath: number[] = [];
 
   constructor(
     serverUrl: string,
@@ -131,6 +135,15 @@ export class AnalysisBot {
             toSector: data.player.currentSector,
             energyAfterMove: data.player.energy
           });
+
+          // If we have a target and we're not there yet, continue navigation
+          if (this.currentTarget && this.currentTarget !== data.player.currentSector) {
+            console.log(`🗂️ Bot ${this.botId} continuing navigation to target ${this.currentTarget} (currently at ${data.player.currentSector})`);
+            // Continue moving towards target using server pathfinding
+            setTimeout(() => {
+              this.socket.emit('moveTo', this.currentTarget);
+            }, this.testMode ? 10 : 100); // Small delay to avoid rapid-fire requests
+          }
         }
       }
     });
@@ -273,6 +286,15 @@ export class AnalysisBot {
 
     if (tradingPosts.length > 0) {
       console.log(`📡 Bot ${this.botId} found ${tradingPosts.length} trading posts: ${tradingPosts.map(tp => `${tp.sectorId}(${tp.type})`).join(', ')}`);
+      this.consecutiveNoTradeScans = 0;
+    } else {
+      this.consecutiveNoTradeScans++;
+      // Smart behavior: if we can't find trading posts near spawn for a while, migrate away
+      if (this.consecutiveNoTradeScans > 10 && this.isNearSpawn()) {
+        console.log(`🚀 Bot ${this.botId} migrating away from crowded spawn area after ${this.consecutiveNoTradeScans} failed scans`);
+        this.migrateAwayFromSpawn();
+        return [];
+      }
     }
 
     return tradingPosts;
@@ -322,11 +344,9 @@ export class AnalysisBot {
     // Same sector is always reachable
     if (currentSectorId === targetSectorId) return true;
     
-    // Check if directly connected
-    const currentSector = this.gameState.sectors[currentSectorId];
-    if (!currentSector) return false;
-    
-    return currentSector.connections.includes(targetSectorId);
+    // Real players can reach any sector within their 7x7 local view using auto-navigation
+    // This function already only gets called with sectors from getLocalSectors() which are within range
+    return true;
   }
 
   private calculateTradingScore(tradingPost: TradingPost): number {
@@ -352,15 +372,17 @@ export class AnalysisBot {
       return;
     }
 
-    // Move to adjacent sector (reachability already verified)
-    console.log(`🎯 Bot ${this.botId} moving to adjacent sector ${sectorId}`);
-
+    // Let server handle pathfinding automatically (both direct moves and multi-hop)
+    console.log(`🎯 Bot ${this.botId} moving to sector ${sectorId} (server will handle pathfinding)`);
+    
     this.logger.logNavigation(this.botId, {
       targetSector: sectorId,
       fromSector: this.gameState.player.currentSector,
+      method: 'server_pathfinding',
       energyBefore: this.gameState.player.energy
     });
 
+    // Use server-side pathfinding (same as real players, just without client-side UI)
     this.socket.emit('moveTo', sectorId);
   }
 
@@ -403,6 +425,66 @@ export class AnalysisBot {
     // Then continue trading if profit is above minimum threshold
     if (this.lastTradeProfit === 0) return true; // First trade attempt
     return this.lastTradeProfit > 15; // Stop when profits drop below 15 credits
+  }
+
+  private isNearSpawn(): boolean {
+    if (!this.gameState || !this.gameState.player) return false;
+    
+    const currentSector = this.gameState.sectors[this.gameState.player.currentSector];
+    if (!currentSector) return false;
+    
+    // Consider "near spawn" as being within 10 sectors of the origin (sector 1)
+    const spawnDistance = Math.sqrt(currentSector.x * currentSector.x + currentSector.y * currentSector.y);
+    return spawnDistance < 10;
+  }
+
+  private migrateAwayFromSpawn() {
+    if (!this.gameState || !this.gameState.player) return;
+    
+    const currentSector = this.gameState.sectors[this.gameState.player.currentSector];
+    if (!currentSector) return;
+    
+    // Smart migration: head towards less crowded areas
+    // Real players would do this by moving consistently in one direction
+    const gridSize = 50;
+    const currentX = currentSector.x;
+    const currentY = currentSector.y;
+    
+    // Choose direction away from spawn (0,0) towards edges
+    let targetDirection = '';
+    if (currentX < gridSize / 2) {
+      targetDirection += 'east ';
+    } else {
+      targetDirection += 'west ';
+    }
+    if (currentY < gridSize / 2) {
+      targetDirection += 'south';
+    } else {
+      targetDirection += 'north';
+    }
+    
+    console.log(`🧭 Bot ${this.botId} migrating ${targetDirection} to find less crowded trading areas`);
+    
+    // Move in the chosen direction by picking the best connected sector
+    let bestConnection = null;
+    let bestScore = -1;
+    
+    for (const connectionId of currentSector.connections) {
+      const connectedSector = this.gameState.sectors[connectionId];
+      if (!connectedSector) continue;
+      
+      // Score based on distance from spawn
+      const distance = Math.sqrt(connectedSector.x * connectedSector.x + connectedSector.y * connectedSector.y);
+      if (distance > bestScore) {
+        bestScore = distance;
+        bestConnection = connectionId;
+      }
+    }
+    
+    if (bestConnection) {
+      this.socket.emit('moveTo', bestConnection);
+      this.consecutiveNoTradeScans = 0; // Reset counter after migration
+    }
   }
 
   private sleep(ms: number): Promise<void> {

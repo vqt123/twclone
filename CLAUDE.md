@@ -174,6 +174,21 @@ Before implementing ANY solution:
 - **Before complex solutions**: "Can we eliminate the root cause instead of treating symptoms?"
 - **Example**: Instead of "fix resource scarcity with complex algorithms," ask "why is there scarcity?"
 
+## Bot Testing Requirements (CRITICAL)
+
+**Bots Must Only Use Real Player Capabilities:**
+- Bots can only see 7x7 local grid (3 sectors in each direction) like real players
+- Bots can only move to adjacent sectors OR use auto-navigation within local view
+- Bots cannot access universe-wide data or perform impossible navigation
+- Bots should simulate realistic player decision-making (profit thresholds, energy management, migration patterns)
+- **Before implementing any bot behavior, verify a real player can perform the same action through the web interface**
+
+**Smart Bot Behaviors (Realistic):**
+- Migrate away from crowded spawn areas when no trading posts found
+- Use auto-navigation for sectors within local view (like clicking on sector in UI)
+- Stop trading when efficiency drops below profitable thresholds
+- Explore systematically rather than randomly when looking for opportunities
+
 ## Key Implementation Details
 
 When modifying game mechanics, ensure energy costs are validated before actions and that all string literals use the appropriate enums from `types.ts`. The frontend automatically updates energy display every 10 seconds and synchronizes with server state changes.

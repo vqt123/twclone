@@ -146,7 +146,7 @@ function parseArgs(): AnalysisConfig {
     serverUrl: 'http://localhost:3000',
     duration: 300000, // 5 minutes default
     botCount: 3,
-    strategies: ['greedy', 'explorer', 'random'],
+    strategies: ['greedy'], // Default to greedy only
     logInterval: 30000, // 30 seconds
     testMode: false
   };
