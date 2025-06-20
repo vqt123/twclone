@@ -28,67 +28,73 @@ TradeWars Clone is a real-time multiplayer space trading game inspired by the cl
 
 **Type System (`src/types.ts`):**
 All game entities use strongly-typed enums instead of magic strings:
-- `Commodity` (ORE, FOOD, EQUIPMENT)
+- `TradingPostType` (MINING_STATION, AGRICULTURAL_PORT, INDUSTRIAL_COMPLEX, COMMERCIAL_HUB, STARPORT)
 - `ShipType` (SCOUT, TRADER, FREIGHTER) 
-- `PortType` (MINING, AGRICULTURAL, INDUSTRIAL, COMMERCIAL, STARPORT)
-- `Action` (MOVE, TRADE) for energy consumption
+- `Action` (MOVE, TRADE, SCAN) for energy consumption
 - Socket event interfaces for type-safe client-server communication
 
 **Game State Architecture:**
-- **Sectors**: 20 interconnected sectors in a 5x4 grid, each with connections to adjacent sectors
-- **Ports**: Randomly distributed across 5 sectors, each specializing in buying/selling specific commodities
-- **Players**: Persistent state including inventory, energy, ship type, and current location
-- **Energy System**: Regenerating resource (100/hour, max 2400) consumed by movement and trading
+- **Universe**: Grid-based universe with adjacent sector connections (see `universeConfig` in `game-config.ts`)
+- **Trading Posts**: Distributed across universe with diminishing efficiency mechanics (see `tradeConfig`)
+- **Players**: Persistent state including credits, energy, ship type, cargo upgrades, and current location
+- **Energy System**: Regenerating resource consumed by movement and trading (see `energyConfig`)
 
-### Server Architecture (`src/server.ts`)
+### Server Architecture
 
-**Core Functions:**
-- `generateSectors()`: Creates the universe grid with sector connections
-- `generatePorts()`: Distributes specialized trading ports with dynamic pricing (±20% variation)
-- `updatePlayerEnergy()`: Handles energy regeneration (1 energy per 36 seconds)
-- `consumeEnergy()`: Validates and deducts energy costs based on ship efficiency
+**Core Modules:**
+- `server.ts`: Express/Socket.io server handling client connections
+- `universe-generator.ts`: Creates 50x50 grid universe with trading posts
+- `energy-system.ts`: Manages player energy regeneration and consumption
+- `game-config.ts`: Central configuration for all game constants
+- `player-factory.ts`: Creates new player instances with starting resources
 
 **Socket Events:**
-- `playerJoined`: Initialize new player with starting ship and energy
-- `moveTo`: Handle sector navigation with energy consumption validation
-- `buyItem`/`sellItem`: Execute trades with port compatibility and inventory checks
-- `playerUpdate`: Broadcast real-time state changes to all clients
+- `playerJoined`: Initialize new player with Scout Ship and 1,000 credits
+- `moveTo`: Handle sector navigation with pathfinding support
+- `executeTrade`: Single-action trading with efficiency decay
+- `purchaseShip`/`purchaseCargoUpgrade`: Ship and cargo progression
+- `scanForTradingPosts`: Long-range scanning within 10-sector radius
 
 ### Client Architecture (`public/index.html`)
 
 **Game State Management:**
 - Maintains local `gameState` object synchronized with server
-- Real-time UI updates for energy, inventory, credits, and player position
+- Real-time UI updates for energy, credits, and player position
 - Visual energy bar with color coding (green/orange/red based on remaining energy)
+- Local scanner shows 7x7 grid centered on player position
 
 **UI Components:**
-- Sector map grid showing all 20 sectors with player counts and port information
-- Trading interface that appears when in sectors with ports
-- Player status panel with ship info, energy gauge, and inventory display
+- Local Scanner: 7x7 sector grid with trading post indicators
+- Trading Interface: Single "Execute Trade" button with efficiency display
+- Ship Upgrade Panel: Purchase ships at StarPorts (5k/15k credits)
+- Cargo Upgrade Panel: Buy cargo holds at StarPorts/Commercial Hubs
+- Direct Navigation: Enter sector number to auto-navigate
+- Long Range Scanner: Find trading posts within 10 sectors
 
 ### Energy & Ship System
 
-**Ship Types with Different Characteristics:**
-- Scout Ship: 80% energy efficiency, 10 cargo capacity (starter ship)
-- Trader Vessel: 100% energy efficiency, 30 cargo capacity  
-- Heavy Freighter: 150% energy efficiency, 50 cargo capacity
+**Ship Configuration:**
+All ship types, their characteristics, and upgrade limits are defined in `shipTypes` within `game-config.ts`.
 
-**Energy Costs:**
-- Movement: 10 base energy × ship efficiency
-- Trading: 5 base energy × ship efficiency
-- Regeneration: 100 energy per hour (continuous background process)
+**Cargo Hold Upgrades:**
+Upgrade mechanics and costs are configured in `cargoUpgradeConfig` within `game-config.ts`.
+
+**Energy System:**
+Energy costs, regeneration rates, and maximum energy are configured in `energyConfig` within `game-config.ts`.
 
 ### Trading System
 
-**Port Specialization:**
-- Mining Stations: Buy ore, sell equipment
-- Agricultural Ports: Buy food, sell ore  
-- Industrial Complexes: Buy equipment, sell food
-- Commercial Hubs: Buy ore/food, sell equipment
-- StarPorts: Universal trading (buy/sell all commodities)
+**Simplified Information Brokerage:**
+- Single "Execute Trade" action at all trading posts
+- Trading posts sell market intelligence/data rather than physical goods
+- No inventory management - pure credit-based transactions
 
-**Dynamic Pricing:**
-Base prices (Ore: 50, Food: 30, Equipment: 100) with ±20% random variation per port.
+**Trading Post Configuration:**
+All trading post types, base profits, and descriptions are defined in `tradingPosts` within `game-config.ts`.
+
+**Efficiency & Regeneration:**
+Trading efficiency decay and regeneration mechanics are configured in `tradeConfig` within `game-config.ts`.
+- Profit calculation: Base × Efficiency × ShipMultiplier × (1 + CargoBonus)
 
 ## Coding Standards
 
@@ -117,17 +123,9 @@ Base prices (Ore: 50, Food: 30, Equipment: 100) with ±20% random variation per 
 - **Requirement**: Verify that Player #10 logging in at hour 23 still has engaging gameplay
 - **Red Flag**: If only players who log in at specific times get good experiences
 
-### 3. Long-term Equilibrium State
-- **Question**: "What does the game look like after 100+ player sessions?"
-- **Requirement**: Confirm the game remains engaging when all players know optimal strategies
-- **Red Flag**: If all players converge on identical optimal strategies with no meaningful choices
-
 ### 4. Multiplayer Systems Validation Checklist
 Before implementing ANY shared system:
 - [ ] Modeled resource depletion under realistic player load
-- [ ] Verified different play schedules don't create unfair advantages  
-- [ ] Confirmed "late arriving" players still have meaningful gameplay
-- [ ] Tested that optimal strategies remain fun when everyone discovers them
 - [ ] Ensured shared resources regenerate appropriately for player count
 
 **FAILURE TO COMPLETE THIS ANALYSIS WILL RESULT IN FUNDAMENTAL DESIGN FLAWS REQUIRING MAJOR REWORK**
@@ -191,8 +189,14 @@ Before implementing ANY solution:
 
 ## Key Implementation Details
 
-When modifying game mechanics, ensure energy costs are validated before actions and that all string literals use the appropriate enums from `types.ts`. The frontend automatically updates energy display every 10 seconds and synchronizes with server state changes.
+**Game Configuration:**
+All game balance values (energy costs, ship stats, trading post profits, universe size, etc.) are centralized in `src/game-config.ts`. When modifying game mechanics, update the configuration file rather than hardcoding values.
 
-Port generation occurs once at server startup. New features should follow the existing pattern of type-safe enums and comprehensive interfaces for client-server communication.
+**Type Safety:**
+Ensure all string literals use the appropriate enums from `types.ts`. New features should follow the existing pattern of type-safe enums and comprehensive interfaces for client-server communication.
 
+**Frontend Updates:**
+The frontend automatically updates energy display every 10 seconds and synchronizes with server state changes. Trading post generation occurs once at server startup.
+
+**Code Organization:**
 When adding new features, consider file size limits and split concerns into separate modules when approaching the 250-line threshold.

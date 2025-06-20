@@ -1,10 +1,10 @@
 import { Sector, TradingPost, TradingPostType } from './types';
-import { tradingPosts, tradeConfig } from './game-config';
+import { tradingPosts, tradeConfig, universeConfig } from './game-config';
 
 export function generateSectors(): { [key: number]: Sector } {
   const sectors: { [key: number]: Sector } = {};
-  const gridSize = 50;
-  const gridHeight = 50;
+  const gridSize = universeConfig.gridWidth;
+  const gridHeight = universeConfig.gridHeight;
   
   for (let x = 0; x < gridSize; x++) {
     for (let y = 0; y < gridHeight; y++) {
@@ -35,8 +35,8 @@ export function generateTradingPosts(sectors: { [key: number]: Sector }): void {
   const tradingPostTypes = Object.keys(tradingPosts) as TradingPostType[];
   const sectorIds = Object.keys(sectors).map(Number);
   
-  // Generate 150 trading posts (6% coverage) with better distribution  
-  const targetPostCount = 150;
+  // Generate trading posts with better distribution  
+  const targetPostCount = universeConfig.tradingPostCount;
   const tradingPostSectors: number[] = [];
   
   // First, ensure we have at least one of each type (5 posts)

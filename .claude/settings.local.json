@@ -41,7 +41,8 @@
       "Bash(find:*)",
       "Bash(timeout 5s npm run analyze:test -- --duration 10 --bots 1)",
       "mcp__puppeteer__puppeteer_navigate",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(rm:*)"
     ],
     "deny": []
   }

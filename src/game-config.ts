@@ -78,3 +78,12 @@ export const cargoUpgradeConfig = {
   costMultiplier: 1.8, // Each upgrade costs 80% more than the last
   capacityIncrease: 5, // Each upgrade adds 5 cargo capacity
 };
+
+// Universe configuration
+export const universeConfig = {
+  gridWidth: 50, // Universe width in sectors
+  gridHeight: 50, // Universe height in sectors
+  tradingPostCount: 150, // Total number of trading posts (6% coverage)
+  localScannerRange: 3, // How many sectors players can see in each direction
+  longRangeScanRange: 10, // Maximum scan distance for trading posts
+};
