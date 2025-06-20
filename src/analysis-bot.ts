@@ -199,6 +199,7 @@ export class AnalysisBot {
         const target = this.selectTarget(localTradingPosts);
         if (target && target.sectorId !== this.currentTarget) {
           this.currentTarget = target.sectorId;
+          this.lastTradeProfit = 0; // Reset profit tracking for new trading post
           await this.moveToLocalSector(target.sectorId);
           this.lastActionTime = now;
           return;
@@ -266,8 +267,13 @@ export class AnalysisBot {
     this.logger.logAction(this.botId, 'local_scan', {
       tradingPostsFound: tradingPosts.length,
       currentSector: this.gameState.player.currentSector,
-      scanRange: range
+      scanRange: range,
+      tradingPostSectors: tradingPosts.map(tp => tp.sectorId)
     });
+
+    if (tradingPosts.length > 0) {
+      console.log(`📡 Bot ${this.botId} found ${tradingPosts.length} trading posts: ${tradingPosts.map(tp => `${tp.sectorId}(${tp.type})`).join(', ')}`);
+    }
 
     return tradingPosts;
   }
@@ -275,24 +281,28 @@ export class AnalysisBot {
   private selectTarget(tradingPosts: TradingPost[]): TradingPost | null {
     if (tradingPosts.length === 0) return null;
 
+    // Filter to only include reachable trading posts (adjacent or current sector)
+    const reachablePosts = tradingPosts.filter(tp => this.isReachable(tp.sectorId));
+    if (reachablePosts.length === 0) return null;
+
     switch (this.strategy) {
       case 'greedy':
         // Prefer StarPorts and Commercial Hubs (higher profits)
-        const highValue = tradingPosts.filter(tp => 
+        const highValue = reachablePosts.filter(tp => 
           tp.type === 'starport' || tp.type === 'commercial'
         );
         if (highValue.length > 0) {
           return highValue.sort((a, b) => a.distance - b.distance)[0];
         }
-        return tradingPosts.sort((a, b) => a.distance - b.distance)[0];
+        return reachablePosts.sort((a, b) => a.distance - b.distance)[0];
 
       case 'explorer':
         // Prefer farther trading posts for exploration
-        return tradingPosts.sort((a, b) => b.distance - a.distance)[0];
+        return reachablePosts.sort((a, b) => b.distance - a.distance)[0];
 
       case 'optimizer':
         // Calculate profit/distance ratio (simplified)
-        const scored = tradingPosts.map(tp => ({
+        const scored = reachablePosts.map(tp => ({
           ...tp,
           score: this.calculateTradingScore(tp)
         }));
@@ -300,8 +310,23 @@ export class AnalysisBot {
 
       case 'random':
       default:
-        return tradingPosts[Math.floor(Math.random() * tradingPosts.length)];
+        return reachablePosts[Math.floor(Math.random() * reachablePosts.length)];
     }
+  }
+
+  private isReachable(targetSectorId: number): boolean {
+    if (!this.gameState || !this.gameState.player) return false;
+    
+    const currentSectorId = this.gameState.player.currentSector;
+    
+    // Same sector is always reachable
+    if (currentSectorId === targetSectorId) return true;
+    
+    // Check if directly connected
+    const currentSector = this.gameState.sectors[currentSectorId];
+    if (!currentSector) return false;
+    
+    return currentSector.connections.includes(targetSectorId);
   }
 
   private calculateTradingScore(tradingPost: TradingPost): number {
@@ -321,31 +346,22 @@ export class AnalysisBot {
   private async moveToLocalSector(sectorId: number) {
     if (!this.gameState || !this.gameState.player) return;
 
-    const currentSector = this.gameState.sectors[this.gameState.player.currentSector];
-    if (!currentSector) return;
-
     // Check if we're already at the target
     if (this.gameState.player.currentSector === sectorId) {
       await this.executeTrade();
       return;
     }
 
-    // Only move to directly connected sectors (like real players)
-    if (currentSector.connections.includes(sectorId)) {
-      console.log(`🎯 Bot ${this.botId} moving to adjacent sector ${sectorId}`);
+    // Move to adjacent sector (reachability already verified)
+    console.log(`🎯 Bot ${this.botId} moving to adjacent sector ${sectorId}`);
 
-      this.logger.logNavigation(this.botId, {
-        targetSector: sectorId,
-        fromSector: this.gameState.player.currentSector,
-        energyBefore: this.gameState.player.energy
-      });
+    this.logger.logNavigation(this.botId, {
+      targetSector: sectorId,
+      fromSector: this.gameState.player.currentSector,
+      energyBefore: this.gameState.player.energy
+    });
 
-      this.socket.emit('moveTo', sectorId);
-    } else {
-      // Target not directly reachable - this shouldn't happen with local scanning
-      console.log(`⚠️ Bot ${this.botId} can't reach non-adjacent sector ${sectorId}`);
-      this.currentTarget = null;
-    }
+    this.socket.emit('moveTo', sectorId);
   }
 
   private async executeTrade() {
@@ -383,8 +399,9 @@ export class AnalysisBot {
   }
 
   private shouldTradeAtCurrentPost(): boolean {
-    // Simple logic: continue trading if profit is above minimum threshold
-    // Real players would stop when returns get too low
+    // Always try to trade at least once at a new trading post
+    // Then continue trading if profit is above minimum threshold
+    if (this.lastTradeProfit === 0) return true; // First trade attempt
     return this.lastTradeProfit > 15; // Stop when profits drop below 15 credits
   }
 
