@@ -32,16 +32,26 @@ export class AnalysisBot {
   private scanCooldown: number = 5000; // 5 seconds between scans
   private lastActionTime: number = 0;
   private actionCooldown: number = 1000; // 1 second between actions
+  private testMode: boolean = false;
 
   constructor(
     serverUrl: string,
     botId: string,
     strategy: BotStrategy,
-    logger: GameLogger
+    logger: GameLogger,
+    testMode: boolean = false
   ) {
     this.botId = botId;
     this.strategy = strategy;
     this.logger = logger;
+    this.testMode = testMode;
+    
+    // Fast mode settings for testing
+    if (testMode) {
+      this.scanCooldown = 0; // No scan cooldown
+      this.actionCooldown = 0; // No action cooldown
+    }
+    
     this.socket = io.default(serverUrl);
     this.setupEventHandlers();
   }
@@ -150,11 +160,13 @@ export class AnalysisBot {
     while (this.isActive && this.gameState) {
       try {
         await this.executeBehavior();
-        await this.sleep(this.actionCooldown);
+        const sleepTime = this.testMode ? 1 : this.actionCooldown;
+        await this.sleep(sleepTime);
       } catch (error) {
         this.logger.logAction(this.botId, 'error', { error: error?.toString() });
         console.error(`💥 Bot ${this.botId} behavior error:`, error);
-        await this.sleep(5000); // Wait longer on error
+        const errorSleep = this.testMode ? 10 : 5000; // Much shorter error sleep in test mode
+        await this.sleep(errorSleep);
       }
     }
   }
@@ -168,7 +180,8 @@ export class AnalysisBot {
     // Check if we need energy
     if (this.gameState.player.energy < 50) {
       console.log(`⚡ Bot ${this.botId} waiting for energy (${this.gameState.player.energy})`);
-      await this.sleep(10000); // Wait 10 seconds for energy
+      const waitTime = this.testMode ? 10 : 10000; // 10ms in test mode, 10 seconds normal
+      await this.sleep(waitTime);
       return;
     }
 

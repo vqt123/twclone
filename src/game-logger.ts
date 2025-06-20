@@ -34,8 +34,8 @@ export class GameLogger {
       botCount,
       universeStats: {
         totalSectors: 2500, // 50x50 grid
-        tradingPostCount: 83, // Current density
-        tradingPostDensity: 0.033 // 3.3%
+        tradingPostCount: 150, // Updated density
+        tradingPostDensity: 0.06 // 6%
       }
     };
 

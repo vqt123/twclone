@@ -54,7 +54,7 @@ export const shipTypes: { [key in ShipType]: ShipInfo } = {
 
 export const energyConfig: EnergyConfig = {
   maxEnergy: 2400,
-  regenRate: 100,
+  regenRate: 200, // Increased from 100 (2x faster regeneration)
   regenInterval: 36000,
   costs: {
     [Action.MOVE]: 8, // Reduced from 10 (20% reduction for better exploration)
@@ -64,7 +64,7 @@ export const energyConfig: EnergyConfig = {
 
 // Trading configuration
 export const tradeConfig = {
-  efficiencyDecay: 0.7, // Each trade reduces efficiency to 70% of previous
+  efficiencyDecay: 0.85, // Each trade reduces efficiency to 85% of previous (slower decay)
   regenTimeHours: 24, // Time to fully regenerate from 0% to 100%
   minEfficiency: 0.05, // Minimum efficiency (5%)
 };

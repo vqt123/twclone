@@ -7,6 +7,7 @@ interface AnalysisConfig {
   botCount: number;
   strategies: BotStrategy[];
   logInterval: number; // status update interval in milliseconds
+  testMode?: boolean; // fast mode for testing
 }
 
 class AnalysisRunner {
@@ -50,14 +51,16 @@ class AnalysisRunner {
         this.config.serverUrl,
         botId,
         strategy,
-        this.logger
+        this.logger,
+        this.config.testMode || false
       );
       
       this.bots.push(bot);
       console.log(`🤖 Created ${botId} with strategy: ${strategy}`);
       
       // Stagger bot connections to avoid overwhelming server
-      await this.sleep(1000);
+      const staggerTime = this.config.testMode ? 10 : 1000;
+      await this.sleep(staggerTime);
     }
 
     // Start status reporting
@@ -144,7 +147,8 @@ function parseArgs(): AnalysisConfig {
     duration: 300000, // 5 minutes default
     botCount: 3,
     strategies: ['greedy', 'explorer', 'random'],
-    logInterval: 30000 // 30 seconds
+    logInterval: 30000, // 30 seconds
+    testMode: false
   };
 
   for (let i = 0; i < args.length; i++) {
@@ -162,6 +166,9 @@ function parseArgs(): AnalysisConfig {
       case '--strategies':
         config.strategies = args[++i].split(',') as BotStrategy[];
         break;
+      case '--test-mode':
+        config.testMode = true;
+        break;
       case '--help':
         console.log(`
 TradeWars Analysis Runner
@@ -173,6 +180,7 @@ Options:
   --bots <count>         Number of bots (default: 3)
   --server <url>         Server URL (default: http://localhost:3000)
   --strategies <list>    Comma-separated strategies (default: greedy,explorer,random)
+  --test-mode            Enable fast test mode (100x time acceleration)
   --help                 Show this help
 
 Available strategies: greedy, explorer, optimizer, random

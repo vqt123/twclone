@@ -10,7 +10,9 @@
     "postinstall": "npm run build",
     "analyze": "ts-node src/run-analysis.ts",
     "analyze:quick": "ts-node src/run-analysis.ts --duration 120",
-    "analyze:extended": "ts-node src/run-analysis.ts --duration 600 --bots 5"
+    "analyze:extended": "ts-node src/run-analysis.ts --duration 600 --bots 5",
+    "analyze:test": "TEST_MODE=true ts-node src/run-analysis.ts --test-mode --duration 60",
+    "dev:test": "TEST_MODE=true nodemon --exec ts-node src/server.ts"
   },
   "dependencies": {
     "@types/socket.io-client": "^1.4.36",
