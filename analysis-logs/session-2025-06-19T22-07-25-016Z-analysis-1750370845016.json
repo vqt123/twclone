@@ -1,0 +1,2955 @@
+{
+  "metadata": {
+    "sessionId": "analysis-1750370845016",
+    "startTime": 1750370845016,
+    "botStrategy": "greedy,explorer,random",
+    "botCount": 1,
+    "universeStats": {
+      "totalSectors": 2500,
+      "tradingPostCount": 83,
+      "tradingPostDensity": 0.033
+    },
+    "endTime": 1750370906029
+  },
+  "events": [
+    {
+      "timestamp": 1750370845018,
+      "type": "system",
+      "botId": "system",
+      "data": {
+        "message": "Analysis session started",
+        "config": {
+          "serverUrl": "http://localhost:3000",
+          "duration": 60000,
+          "botCount": 1,
+          "strategies": [
+            "greedy",
+            "explorer",
+            "random"
+          ],
+          "logInterval": 30000
+        },
+        "startTime": 1750370845018
+      }
+    },
+    {
+      "timestamp": 1750370845053,
+      "type": "system",
+      "botId": "system",
+      "data": {
+        "message": "Bot bot-greedy-1 connected",
+        "strategy": "greedy"
+      }
+    },
+    {
+      "timestamp": 1750370845054,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "joined",
+        "playerId": "aff200e3-d0ac-4fab-836a-a72b1c653849",
+        "playerName": "Player133",
+        "startingSector": 1,
+        "startingCredits": 1000,
+        "startingShip": "scout",
+        "startingEnergy": 2400
+      }
+    },
+    {
+      "timestamp": 1750370845054,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 1,
+        "credits": 1000,
+        "energy": 2400,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370845054,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "scan",
+        "tradingPostsFound": 6,
+        "currentSector": 1,
+        "scanRange": 10
+      }
+    },
+    {
+      "timestamp": 1750370845054,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 1,
+        "toSector": 51,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370845063,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 51,
+        "credits": 1000,
+        "energy": 2393
+      }
+    },
+    {
+      "timestamp": 1750370845063,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 51,
+        "credits": 1000,
+        "energy": 2393,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370845063,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 54,
+        "toSector": 51,
+        "energyAfterMove": 2393
+      }
+    },
+    {
+      "timestamp": 1750370846056,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 51,
+        "toSector": 101,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370846070,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 101,
+        "credits": 1000,
+        "energy": 2386
+      }
+    },
+    {
+      "timestamp": 1750370846070,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 101,
+        "credits": 1000,
+        "energy": 2386,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370846070,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 54,
+        "toSector": 101,
+        "energyAfterMove": 2386
+      }
+    },
+    {
+      "timestamp": 1750370847059,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 101,
+        "toSector": 151,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370847073,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 151,
+        "credits": 1000,
+        "energy": 2379
+      }
+    },
+    {
+      "timestamp": 1750370847073,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 151,
+        "credits": 1000,
+        "energy": 2379,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370847073,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 54,
+        "toSector": 151,
+        "energyAfterMove": 2379
+      }
+    },
+    {
+      "timestamp": 1750370848062,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 151,
+        "toSector": 201,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370848078,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 201,
+        "credits": 1000,
+        "energy": 2372
+      }
+    },
+    {
+      "timestamp": 1750370848078,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 201,
+        "credits": 1000,
+        "energy": 2372,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370848078,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 54,
+        "toSector": 201,
+        "energyAfterMove": 2372
+      }
+    },
+    {
+      "timestamp": 1750370849064,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 201,
+        "toSector": 202,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370849072,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 202,
+        "credits": 1000,
+        "energy": 2365
+      }
+    },
+    {
+      "timestamp": 1750370849072,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 202,
+        "credits": 1000,
+        "energy": 2365,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370849072,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 54,
+        "toSector": 202,
+        "energyAfterMove": 2365
+      }
+    },
+    {
+      "timestamp": 1750370850066,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "scan",
+        "tradingPostsFound": 10,
+        "currentSector": 202,
+        "scanRange": 10
+      }
+    },
+    {
+      "timestamp": 1750370850066,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 202,
+        "toSector": 152,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370850081,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 152,
+        "credits": 1000,
+        "energy": 2358
+      }
+    },
+    {
+      "timestamp": 1750370850081,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 152,
+        "credits": 1000,
+        "energy": 2358,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370850081,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 54,
+        "toSector": 152,
+        "energyAfterMove": 2358
+      }
+    },
+    {
+      "timestamp": 1750370851068,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 152,
+        "toSector": 202,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370851083,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 202,
+        "credits": 1000,
+        "energy": 2351
+      }
+    },
+    {
+      "timestamp": 1750370851084,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 202,
+        "credits": 1000,
+        "energy": 2351,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370851084,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 54,
+        "toSector": 202,
+        "energyAfterMove": 2351
+      }
+    },
+    {
+      "timestamp": 1750370852070,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 202,
+        "toSector": 201,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370852082,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 201,
+        "credits": 1000,
+        "energy": 2344
+      }
+    },
+    {
+      "timestamp": 1750370852082,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 201,
+        "credits": 1000,
+        "energy": 2344,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370852083,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 54,
+        "toSector": 201,
+        "energyAfterMove": 2344
+      }
+    },
+    {
+      "timestamp": 1750370853071,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 201,
+        "toSector": 251,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370853086,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 251,
+        "credits": 1000,
+        "energy": 2337
+      }
+    },
+    {
+      "timestamp": 1750370853086,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 251,
+        "credits": 1000,
+        "energy": 2337,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370853086,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 54,
+        "toSector": 251,
+        "energyAfterMove": 2337
+      }
+    },
+    {
+      "timestamp": 1750370854074,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 251,
+        "toSector": 252,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370854083,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 252,
+        "credits": 1000,
+        "energy": 2330
+      }
+    },
+    {
+      "timestamp": 1750370854083,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 252,
+        "credits": 1000,
+        "energy": 2330,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370854083,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 54,
+        "toSector": 252,
+        "energyAfterMove": 2330
+      }
+    },
+    {
+      "timestamp": 1750370855077,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "scan",
+        "tradingPostsFound": 10,
+        "currentSector": 252,
+        "scanRange": 10
+      }
+    },
+    {
+      "timestamp": 1750370855077,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 252,
+        "toSector": 202,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370855088,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 202,
+        "credits": 1000,
+        "energy": 2323
+      }
+    },
+    {
+      "timestamp": 1750370855088,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 202,
+        "credits": 1000,
+        "energy": 2323,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370855088,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 54,
+        "toSector": 202,
+        "energyAfterMove": 2323
+      }
+    },
+    {
+      "timestamp": 1750370856080,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 202,
+        "toSector": 152,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370856098,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 152,
+        "credits": 1000,
+        "energy": 2316
+      }
+    },
+    {
+      "timestamp": 1750370856098,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 152,
+        "credits": 1000,
+        "energy": 2316,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370856098,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 54,
+        "toSector": 152,
+        "energyAfterMove": 2316
+      }
+    },
+    {
+      "timestamp": 1750370857081,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 152,
+        "toSector": 102,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370857096,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 102,
+        "credits": 1000,
+        "energy": 2309
+      }
+    },
+    {
+      "timestamp": 1750370857096,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 102,
+        "credits": 1000,
+        "energy": 2309,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370857096,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 54,
+        "toSector": 102,
+        "energyAfterMove": 2309
+      }
+    },
+    {
+      "timestamp": 1750370858083,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 102,
+        "toSector": 52,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370858097,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 52,
+        "credits": 1000,
+        "energy": 2302
+      }
+    },
+    {
+      "timestamp": 1750370858097,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 52,
+        "credits": 1000,
+        "energy": 2302,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370858097,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 54,
+        "toSector": 52,
+        "energyAfterMove": 2302
+      }
+    },
+    {
+      "timestamp": 1750370859085,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 52,
+        "toSector": 51,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370859093,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 51,
+        "credits": 1000,
+        "energy": 2295
+      }
+    },
+    {
+      "timestamp": 1750370859093,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 51,
+        "credits": 1000,
+        "energy": 2295,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370859093,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 54,
+        "toSector": 51,
+        "energyAfterMove": 2295
+      }
+    },
+    {
+      "timestamp": 1750370860087,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "scan",
+        "tradingPostsFound": 7,
+        "currentSector": 51,
+        "scanRange": 10
+      }
+    },
+    {
+      "timestamp": 1750370860087,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 51,
+        "toSector": 1,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370860101,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 1,
+        "credits": 1000,
+        "energy": 2288
+      }
+    },
+    {
+      "timestamp": 1750370860101,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 1,
+        "credits": 1000,
+        "energy": 2288,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370860101,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 54,
+        "toSector": 1,
+        "energyAfterMove": 2288
+      }
+    },
+    {
+      "timestamp": 1750370861090,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 1,
+        "toSector": 2,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370861103,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 2,
+        "credits": 1000,
+        "energy": 2281
+      }
+    },
+    {
+      "timestamp": 1750370861103,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 2,
+        "credits": 1000,
+        "energy": 2281,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370861103,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 54,
+        "toSector": 2,
+        "energyAfterMove": 2281
+      }
+    },
+    {
+      "timestamp": 1750370862091,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 2,
+        "toSector": 52,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370862106,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 52,
+        "credits": 1000,
+        "energy": 2274
+      }
+    },
+    {
+      "timestamp": 1750370862106,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 52,
+        "credits": 1000,
+        "energy": 2274,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370862106,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 54,
+        "toSector": 52,
+        "energyAfterMove": 2274
+      }
+    },
+    {
+      "timestamp": 1750370863093,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 52,
+        "toSector": 53,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370863099,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 53,
+        "credits": 1000,
+        "energy": 2267
+      }
+    },
+    {
+      "timestamp": 1750370863099,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 53,
+        "credits": 1000,
+        "energy": 2267,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370863099,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 54,
+        "toSector": 53,
+        "energyAfterMove": 2267
+      }
+    },
+    {
+      "timestamp": 1750370864094,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 53,
+        "toSector": 52,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370864103,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 52,
+        "credits": 1000,
+        "energy": 2260
+      }
+    },
+    {
+      "timestamp": 1750370864103,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 52,
+        "credits": 1000,
+        "energy": 2260,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370864103,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 54,
+        "toSector": 52,
+        "energyAfterMove": 2260
+      }
+    },
+    {
+      "timestamp": 1750370865096,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "scan",
+        "tradingPostsFound": 7,
+        "currentSector": 52,
+        "scanRange": 10
+      }
+    },
+    {
+      "timestamp": 1750370865097,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 52,
+        "toSector": 51,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370865110,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 51,
+        "credits": 1000,
+        "energy": 2253
+      }
+    },
+    {
+      "timestamp": 1750370865110,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 51,
+        "credits": 1000,
+        "energy": 2253,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370865110,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 54,
+        "toSector": 51,
+        "energyAfterMove": 2253
+      }
+    },
+    {
+      "timestamp": 1750370866099,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 51,
+        "toSector": 101,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370866119,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 101,
+        "credits": 1000,
+        "energy": 2246
+      }
+    },
+    {
+      "timestamp": 1750370866119,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 101,
+        "credits": 1000,
+        "energy": 2246,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370866119,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 54,
+        "toSector": 101,
+        "energyAfterMove": 2246
+      }
+    },
+    {
+      "timestamp": 1750370867101,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 101,
+        "toSector": 102,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370867115,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 102,
+        "credits": 1000,
+        "energy": 2239
+      }
+    },
+    {
+      "timestamp": 1750370867115,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 102,
+        "credits": 1000,
+        "energy": 2239,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370867115,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 54,
+        "toSector": 102,
+        "energyAfterMove": 2239
+      }
+    },
+    {
+      "timestamp": 1750370868104,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 102,
+        "toSector": 152,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370868117,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 152,
+        "credits": 1000,
+        "energy": 2232
+      }
+    },
+    {
+      "timestamp": 1750370868117,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 152,
+        "credits": 1000,
+        "energy": 2232,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370868117,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 54,
+        "toSector": 152,
+        "energyAfterMove": 2232
+      }
+    },
+    {
+      "timestamp": 1750370869105,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 152,
+        "toSector": 202,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370869113,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 202,
+        "credits": 1000,
+        "energy": 2225
+      }
+    },
+    {
+      "timestamp": 1750370869113,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 202,
+        "credits": 1000,
+        "energy": 2225,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370869113,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 54,
+        "toSector": 202,
+        "energyAfterMove": 2225
+      }
+    },
+    {
+      "timestamp": 1750370870106,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "scan",
+        "tradingPostsFound": 10,
+        "currentSector": 202,
+        "scanRange": 10
+      }
+    },
+    {
+      "timestamp": 1750370870106,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 202,
+        "toSector": 203,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370870121,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 203,
+        "credits": 1000,
+        "energy": 2218
+      }
+    },
+    {
+      "timestamp": 1750370870121,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 203,
+        "credits": 1000,
+        "energy": 2218,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370870121,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 54,
+        "toSector": 203,
+        "energyAfterMove": 2218
+      }
+    },
+    {
+      "timestamp": 1750370871108,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 203,
+        "toSector": 204,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370871122,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 204,
+        "credits": 1000,
+        "energy": 2211
+      }
+    },
+    {
+      "timestamp": 1750370871122,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 204,
+        "credits": 1000,
+        "energy": 2211,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370871122,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 54,
+        "toSector": 204,
+        "energyAfterMove": 2211
+      }
+    },
+    {
+      "timestamp": 1750370872110,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 204,
+        "toSector": 203,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370872122,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 203,
+        "credits": 1000,
+        "energy": 2204
+      }
+    },
+    {
+      "timestamp": 1750370872122,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 203,
+        "credits": 1000,
+        "energy": 2204,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370872122,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 54,
+        "toSector": 203,
+        "energyAfterMove": 2204
+      }
+    },
+    {
+      "timestamp": 1750370873111,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 203,
+        "toSector": 153,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370873127,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 153,
+        "credits": 1000,
+        "energy": 2197
+      }
+    },
+    {
+      "timestamp": 1750370873127,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 153,
+        "credits": 1000,
+        "energy": 2197,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370873127,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 54,
+        "toSector": 153,
+        "energyAfterMove": 2197
+      }
+    },
+    {
+      "timestamp": 1750370874113,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 153,
+        "toSector": 103,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370874122,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 103,
+        "credits": 1000,
+        "energy": 2190
+      }
+    },
+    {
+      "timestamp": 1750370874122,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 103,
+        "credits": 1000,
+        "energy": 2190,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370874122,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 54,
+        "toSector": 103,
+        "energyAfterMove": 2190
+      }
+    },
+    {
+      "timestamp": 1750370875114,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "scan",
+        "tradingPostsFound": 8,
+        "currentSector": 103,
+        "scanRange": 10
+      }
+    },
+    {
+      "timestamp": 1750370875114,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 103,
+        "toSector": 102,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370875126,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 102,
+        "credits": 1000,
+        "energy": 2183
+      }
+    },
+    {
+      "timestamp": 1750370875126,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 102,
+        "credits": 1000,
+        "energy": 2183,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370875126,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 54,
+        "toSector": 102,
+        "energyAfterMove": 2183
+      }
+    },
+    {
+      "timestamp": 1750370876030,
+      "type": "system",
+      "botId": "system",
+      "data": {
+        "message": "Status report",
+        "elapsed": 31011,
+        "remaining": 28989,
+        "eventCount": 135,
+        "activeBots": 1,
+        "botStats": [
+          {
+            "botId": "bot-greedy-1",
+            "strategy": "greedy",
+            "status": "active",
+            "sector": 102,
+            "credits": 1000,
+            "energy": 2183,
+            "ship": "scout"
+          }
+        ]
+      }
+    },
+    {
+      "timestamp": 1750370876116,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 102,
+        "toSector": 152,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370876132,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 152,
+        "credits": 1000,
+        "energy": 2176
+      }
+    },
+    {
+      "timestamp": 1750370876132,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 152,
+        "credits": 1000,
+        "energy": 2176,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370876132,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 54,
+        "toSector": 152,
+        "energyAfterMove": 2176
+      }
+    },
+    {
+      "timestamp": 1750370877117,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 152,
+        "toSector": 102,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370877133,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 102,
+        "credits": 1000,
+        "energy": 2169
+      }
+    },
+    {
+      "timestamp": 1750370877133,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 102,
+        "credits": 1000,
+        "energy": 2169,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370877133,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 54,
+        "toSector": 102,
+        "energyAfterMove": 2169
+      }
+    },
+    {
+      "timestamp": 1750370878119,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 102,
+        "toSector": 52,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370878131,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 52,
+        "credits": 1000,
+        "energy": 2162
+      }
+    },
+    {
+      "timestamp": 1750370878131,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 52,
+        "credits": 1000,
+        "energy": 2162,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370878131,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 54,
+        "toSector": 52,
+        "energyAfterMove": 2162
+      }
+    },
+    {
+      "timestamp": 1750370879120,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 52,
+        "toSector": 51,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370879130,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 51,
+        "credits": 1000,
+        "energy": 2155
+      }
+    },
+    {
+      "timestamp": 1750370879130,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 51,
+        "credits": 1000,
+        "energy": 2155,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370879130,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 54,
+        "toSector": 51,
+        "energyAfterMove": 2155
+      }
+    },
+    {
+      "timestamp": 1750370880122,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "scan",
+        "tradingPostsFound": 7,
+        "currentSector": 51,
+        "scanRange": 10
+      }
+    },
+    {
+      "timestamp": 1750370880123,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 51,
+        "toSector": 101,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370880139,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 101,
+        "credits": 1000,
+        "energy": 2148
+      }
+    },
+    {
+      "timestamp": 1750370880139,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 101,
+        "credits": 1000,
+        "energy": 2148,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370880139,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 54,
+        "toSector": 101,
+        "energyAfterMove": 2148
+      }
+    },
+    {
+      "timestamp": 1750370881124,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 101,
+        "toSector": 151,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370881135,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 151,
+        "credits": 1000,
+        "energy": 2142
+      }
+    },
+    {
+      "timestamp": 1750370881135,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 151,
+        "credits": 1000,
+        "energy": 2142,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370881135,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 54,
+        "toSector": 151,
+        "energyAfterMove": 2142
+      }
+    },
+    {
+      "timestamp": 1750370882125,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 151,
+        "toSector": 152,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370882141,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 152,
+        "credits": 1000,
+        "energy": 2135
+      }
+    },
+    {
+      "timestamp": 1750370882141,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 152,
+        "credits": 1000,
+        "energy": 2135,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370882141,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 54,
+        "toSector": 152,
+        "energyAfterMove": 2135
+      }
+    },
+    {
+      "timestamp": 1750370883126,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 152,
+        "toSector": 153,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370883141,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 153,
+        "credits": 1000,
+        "energy": 2128
+      }
+    },
+    {
+      "timestamp": 1750370883141,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 153,
+        "credits": 1000,
+        "energy": 2128,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370883141,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 54,
+        "toSector": 153,
+        "energyAfterMove": 2128
+      }
+    },
+    {
+      "timestamp": 1750370884128,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 153,
+        "toSector": 203,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370884139,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 203,
+        "credits": 1000,
+        "energy": 2121
+      }
+    },
+    {
+      "timestamp": 1750370884139,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 203,
+        "credits": 1000,
+        "energy": 2121,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370884139,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 54,
+        "toSector": 203,
+        "energyAfterMove": 2121
+      }
+    },
+    {
+      "timestamp": 1750370885130,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "scan",
+        "tradingPostsFound": 10,
+        "currentSector": 203,
+        "scanRange": 10
+      }
+    },
+    {
+      "timestamp": 1750370885130,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 203,
+        "toSector": 202,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370885144,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 202,
+        "credits": 1000,
+        "energy": 2114
+      }
+    },
+    {
+      "timestamp": 1750370885144,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 202,
+        "credits": 1000,
+        "energy": 2114,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370885144,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 54,
+        "toSector": 202,
+        "energyAfterMove": 2114
+      }
+    },
+    {
+      "timestamp": 1750370886132,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 202,
+        "toSector": 201,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370886150,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 201,
+        "credits": 1000,
+        "energy": 2107
+      }
+    },
+    {
+      "timestamp": 1750370886150,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 201,
+        "credits": 1000,
+        "energy": 2107,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370886150,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 54,
+        "toSector": 201,
+        "energyAfterMove": 2107
+      }
+    },
+    {
+      "timestamp": 1750370887135,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 201,
+        "toSector": 202,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370887147,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 202,
+        "credits": 1000,
+        "energy": 2100
+      }
+    },
+    {
+      "timestamp": 1750370887147,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 202,
+        "credits": 1000,
+        "energy": 2100,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370887147,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 54,
+        "toSector": 202,
+        "energyAfterMove": 2100
+      }
+    },
+    {
+      "timestamp": 1750370888136,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 202,
+        "toSector": 201,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370888150,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 201,
+        "credits": 1000,
+        "energy": 2093
+      }
+    },
+    {
+      "timestamp": 1750370888150,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 201,
+        "credits": 1000,
+        "energy": 2093,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370888150,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 54,
+        "toSector": 201,
+        "energyAfterMove": 2093
+      }
+    },
+    {
+      "timestamp": 1750370889137,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 201,
+        "toSector": 202,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370889146,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 202,
+        "credits": 1000,
+        "energy": 2086
+      }
+    },
+    {
+      "timestamp": 1750370889146,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 202,
+        "credits": 1000,
+        "energy": 2086,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370889146,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 54,
+        "toSector": 202,
+        "energyAfterMove": 2086
+      }
+    },
+    {
+      "timestamp": 1750370890138,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "scan",
+        "tradingPostsFound": 10,
+        "currentSector": 202,
+        "scanRange": 10
+      }
+    },
+    {
+      "timestamp": 1750370890139,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 202,
+        "toSector": 252,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370890149,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 252,
+        "credits": 1000,
+        "energy": 2079
+      }
+    },
+    {
+      "timestamp": 1750370890149,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 252,
+        "credits": 1000,
+        "energy": 2079,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370890149,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 54,
+        "toSector": 252,
+        "energyAfterMove": 2079
+      }
+    },
+    {
+      "timestamp": 1750370891141,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 252,
+        "toSector": 202,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370891155,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 202,
+        "credits": 1000,
+        "energy": 2072
+      }
+    },
+    {
+      "timestamp": 1750370891155,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 202,
+        "credits": 1000,
+        "energy": 2072,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370891155,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 54,
+        "toSector": 202,
+        "energyAfterMove": 2072
+      }
+    },
+    {
+      "timestamp": 1750370892143,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 202,
+        "toSector": 252,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370892157,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 252,
+        "credits": 1000,
+        "energy": 2065
+      }
+    },
+    {
+      "timestamp": 1750370892157,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 252,
+        "credits": 1000,
+        "energy": 2065,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370892157,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 54,
+        "toSector": 252,
+        "energyAfterMove": 2065
+      }
+    },
+    {
+      "timestamp": 1750370893144,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 252,
+        "toSector": 251,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370893160,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 251,
+        "credits": 1000,
+        "energy": 2058
+      }
+    },
+    {
+      "timestamp": 1750370893160,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 251,
+        "credits": 1000,
+        "energy": 2058,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370893160,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 54,
+        "toSector": 251,
+        "energyAfterMove": 2058
+      }
+    },
+    {
+      "timestamp": 1750370894146,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 251,
+        "toSector": 201,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370894157,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 201,
+        "credits": 1000,
+        "energy": 2051
+      }
+    },
+    {
+      "timestamp": 1750370894157,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 201,
+        "credits": 1000,
+        "energy": 2051,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370894157,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 54,
+        "toSector": 201,
+        "energyAfterMove": 2051
+      }
+    },
+    {
+      "timestamp": 1750370895148,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "scan",
+        "tradingPostsFound": 10,
+        "currentSector": 201,
+        "scanRange": 10
+      }
+    },
+    {
+      "timestamp": 1750370895149,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 201,
+        "toSector": 151,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370895164,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 151,
+        "credits": 1000,
+        "energy": 2044
+      }
+    },
+    {
+      "timestamp": 1750370895164,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 151,
+        "credits": 1000,
+        "energy": 2044,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370895164,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 54,
+        "toSector": 151,
+        "energyAfterMove": 2044
+      }
+    },
+    {
+      "timestamp": 1750370896150,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 151,
+        "toSector": 101,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370896167,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 101,
+        "credits": 1000,
+        "energy": 2037
+      }
+    },
+    {
+      "timestamp": 1750370896167,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 101,
+        "credits": 1000,
+        "energy": 2037,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370896167,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 54,
+        "toSector": 101,
+        "energyAfterMove": 2037
+      }
+    },
+    {
+      "timestamp": 1750370897152,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 101,
+        "toSector": 102,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370897160,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 102,
+        "credits": 1000,
+        "energy": 2030
+      }
+    },
+    {
+      "timestamp": 1750370897160,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 102,
+        "credits": 1000,
+        "energy": 2030,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370897160,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 54,
+        "toSector": 102,
+        "energyAfterMove": 2030
+      }
+    },
+    {
+      "timestamp": 1750370898154,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 102,
+        "toSector": 103,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370898166,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 103,
+        "credits": 1000,
+        "energy": 2023
+      }
+    },
+    {
+      "timestamp": 1750370898166,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 103,
+        "credits": 1000,
+        "energy": 2023,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370898166,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 54,
+        "toSector": 103,
+        "energyAfterMove": 2023
+      }
+    },
+    {
+      "timestamp": 1750370899156,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 103,
+        "toSector": 153,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370899169,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 153,
+        "credits": 1000,
+        "energy": 2016
+      }
+    },
+    {
+      "timestamp": 1750370899169,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 153,
+        "credits": 1000,
+        "energy": 2016,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370899169,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 54,
+        "toSector": 153,
+        "energyAfterMove": 2016
+      }
+    },
+    {
+      "timestamp": 1750370900157,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "scan",
+        "tradingPostsFound": 8,
+        "currentSector": 153,
+        "scanRange": 10
+      }
+    },
+    {
+      "timestamp": 1750370900157,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 153,
+        "toSector": 154,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370900165,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 154,
+        "credits": 1000,
+        "energy": 2009
+      }
+    },
+    {
+      "timestamp": 1750370900165,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 154,
+        "credits": 1000,
+        "energy": 2009,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370900165,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 54,
+        "toSector": 154,
+        "energyAfterMove": 2009
+      }
+    },
+    {
+      "timestamp": 1750370901159,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 154,
+        "toSector": 204,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370901170,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 204,
+        "credits": 1000,
+        "energy": 2002
+      }
+    },
+    {
+      "timestamp": 1750370901170,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 204,
+        "credits": 1000,
+        "energy": 2002,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370901170,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 54,
+        "toSector": 204,
+        "energyAfterMove": 2002
+      }
+    },
+    {
+      "timestamp": 1750370902160,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 204,
+        "toSector": 205,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370902178,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 205,
+        "credits": 1000,
+        "energy": 1995
+      }
+    },
+    {
+      "timestamp": 1750370902178,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 205,
+        "credits": 1000,
+        "energy": 1995,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370902178,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 54,
+        "toSector": 205,
+        "energyAfterMove": 1995
+      }
+    },
+    {
+      "timestamp": 1750370903162,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 205,
+        "toSector": 255,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370903175,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 255,
+        "credits": 1000,
+        "energy": 1988
+      }
+    },
+    {
+      "timestamp": 1750370903175,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 255,
+        "credits": 1000,
+        "energy": 1988,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370903175,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 54,
+        "toSector": 255,
+        "energyAfterMove": 1988
+      }
+    },
+    {
+      "timestamp": 1750370904163,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 255,
+        "toSector": 254,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370904176,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 254,
+        "credits": 1000,
+        "energy": 1981
+      }
+    },
+    {
+      "timestamp": 1750370904176,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 254,
+        "credits": 1000,
+        "energy": 1981,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370904176,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 54,
+        "toSector": 254,
+        "energyAfterMove": 1981
+      }
+    },
+    {
+      "timestamp": 1750370905164,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "scan",
+        "tradingPostsFound": 11,
+        "currentSector": 254,
+        "scanRange": 10
+      }
+    },
+    {
+      "timestamp": 1750370905164,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "explore",
+        "fromSector": 254,
+        "toSector": 204,
+        "reason": "random_exploration"
+      }
+    },
+    {
+      "timestamp": 1750370905180,
+      "type": "action",
+      "botId": "bot-greedy-1",
+      "data": {
+        "action": "update",
+        "updateType": "moved",
+        "sector": 204,
+        "credits": 1000,
+        "energy": 1974
+      }
+    },
+    {
+      "timestamp": 1750370905180,
+      "type": "state",
+      "botId": "bot-greedy-1",
+      "data": {
+        "sector": 204,
+        "credits": 1000,
+        "energy": 1974,
+        "ship": "scout"
+      }
+    },
+    {
+      "timestamp": 1750370905180,
+      "type": "navigation",
+      "botId": "bot-greedy-1",
+      "data": {
+        "fromSector": 307,
+        "toSector": 204,
+        "energyAfterMove": 1974
+      }
+    },
+    {
+      "timestamp": 1750370906029,
+      "type": "system",
+      "botId": "system",
+      "data": {
+        "message": "Bot bot-greedy-1 disconnected"
+      }
+    },
+    {
+      "timestamp": 1750370906029,
+      "type": "system",
+      "botId": "system",
+      "data": {
+        "message": "Bot bot-greedy-1 stopped"
+      }
+    },
+    {
+      "timestamp": 1750370906029,
+      "type": "system",
+      "botId": "system",
+      "data": {
+        "message": "Analysis session ended",
+        "endTime": 1750370906029,
+        "totalDuration": 61011,
+        "finalEventCount": 264
+      }
+    }
+  ],
+  "summary": {
+    "duration": 61013,
+    "durationMinutes": 1.02,
+    "totalEvents": 265,
+    "actionCount": 136,
+    "tradingCount": 0,
+    "eventsPerMinute": 260.6
+  }
+}
