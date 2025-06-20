@@ -36,6 +36,39 @@ const gameState: GameState = {
 
 generateTradingPosts(gameState.sectors);
 
+// Pathfinding function for multi-hop navigation
+function findPath(sectors: { [key: number]: any }, startSectorId: number, targetSectorId: number): number[] | null {
+  if (startSectorId === targetSectorId) return [startSectorId];
+  
+  const queue = [{sectorId: startSectorId, path: [startSectorId]}];
+  const visited = new Set<number>();
+  
+  while (queue.length > 0) {
+    const {sectorId, path} = queue.shift()!;
+    
+    if (visited.has(sectorId)) continue;
+    visited.add(sectorId);
+    
+    const sector = sectors[sectorId];
+    if (!sector) continue;
+    
+    for (const connectedSectorId of sector.connections) {
+      if (connectedSectorId === targetSectorId) {
+        return [...path, connectedSectorId];
+      }
+      
+      if (!visited.has(connectedSectorId)) {
+        queue.push({
+          sectorId: connectedSectorId, 
+          path: [...path, connectedSectorId]
+        });
+      }
+    }
+  }
+  
+  return null; // No path found
+}
+
 io.on('connection', (socket) => {
   console.log('Player connected:', socket.id);
   
@@ -64,8 +97,41 @@ io.on('connection', (socket) => {
     const currentSector = gameState.sectors[player.currentSector];
     const targetSector = gameState.sectors[targetSectorId];
     
-    if (!targetSector || !currentSector.connections.includes(targetSectorId)) {
-      socket.emit('error', 'Invalid move');
+    if (!targetSector) {
+      socket.emit('error', 'Invalid sector');
+      return;
+    }
+    
+    // Direct connection - single hop
+    if (currentSector.connections.includes(targetSectorId)) {
+      if (!consumeEnergy(player, Action.MOVE)) {
+        socket.emit('error', 'Not enough energy to move');
+        return;
+      }
+      
+      currentSector.players = currentSector.players.filter(id => id !== player.id);
+      player.currentSector = targetSectorId;
+      targetSector.players.push(player.id);
+      
+      io.emit('playerUpdate', {
+        type: PlayerUpdateType.MOVED,
+        player: player,
+        sectors: gameState.sectors
+      } as PlayerUpdateData);
+      return;
+    }
+    
+    // No direct connection - try pathfinding for auto-navigation
+    const path = findPath(gameState.sectors, player.currentSector, targetSectorId);
+    if (!path || path.length <= 1) {
+      socket.emit('error', 'No route found to target sector');
+      return;
+    }
+    
+    // Move to next sector in path (excluding current sector)
+    const nextSectorId = path[1];
+    if (!currentSector.connections.includes(nextSectorId)) {
+      socket.emit('error', 'Invalid pathfinding result');
       return;
     }
     
@@ -74,9 +140,10 @@ io.on('connection', (socket) => {
       return;
     }
     
+    const nextSector = gameState.sectors[nextSectorId];
     currentSector.players = currentSector.players.filter(id => id !== player.id);
-    player.currentSector = targetSectorId;
-    targetSector.players.push(player.id);
+    player.currentSector = nextSectorId;
+    nextSector.players.push(player.id);
     
     io.emit('playerUpdate', {
       type: PlayerUpdateType.MOVED,

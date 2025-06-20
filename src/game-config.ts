@@ -3,27 +3,27 @@ import { TradingPostType, ShipType, Action, TradingPostInfo, ShipInfo, EnergyCon
 export const tradingPosts: { [key in TradingPostType]: TradingPostInfo } = {
   [TradingPostType.MINING]: { 
     name: 'Mining Station', 
-    baseProfit: 75,
+    baseProfit: 115, // Increased from 75 (+53% for travel cost compensation)
     description: 'Industrial data on mining operations and asteroid surveys'
   },
   [TradingPostType.AGRICULTURAL]: { 
     name: 'Agricultural Port', 
-    baseProfit: 60,
+    baseProfit: 90, // Increased from 60 (+50% for travel cost compensation)
     description: 'Agricultural market trends and crop yield forecasts'
   },
   [TradingPostType.INDUSTRIAL]: { 
     name: 'Industrial Complex', 
-    baseProfit: 85,
+    baseProfit: 130, // Increased from 85 (+53% for travel cost compensation)
     description: 'Manufacturing schedules and supply chain intelligence'
   },
   [TradingPostType.COMMERCIAL]: { 
     name: 'Commercial Hub', 
-    baseProfit: 90,
+    baseProfit: 135, // Increased from 90 (+50% for travel cost compensation)
     description: 'Trade route analysis and merchant fleet movements'
   },
   [TradingPostType.STARPORT]: { 
     name: 'StarPort', 
-    baseProfit: 100,
+    baseProfit: 150, // Increased from 100 (+50% for travel cost compensation)
     description: 'Comprehensive sector intelligence and navigation data'
   }
 };
@@ -57,7 +57,7 @@ export const energyConfig: EnergyConfig = {
   regenRate: 100,
   regenInterval: 36000,
   costs: {
-    [Action.MOVE]: 10,
+    [Action.MOVE]: 8, // Reduced from 10 (20% reduction for better exploration)
     [Action.TRADE]: 5
   }
 };

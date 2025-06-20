@@ -293,13 +293,8 @@ export class AnalysisBot {
       return;
     }
 
-    // Check if target is directly connected
-    if (!currentSector || !currentSector.connections.includes(sectorId)) {
-      console.log(`⚠️  Bot ${this.botId} cannot directly reach sector ${sectorId} from ${this.gameState.player.currentSector}`);
-      // For now, just explore randomly instead
-      await this.exploreRandomly();
-      return;
-    }
+    // Server now handles pathfinding, so trust it to find a route
+    console.log(`🎯 Bot ${this.botId} attempting to reach sector ${sectorId} from ${this.gameState.player.currentSector}`);
 
     this.logger.logNavigation(this.botId, {
       targetSector: sectorId,
