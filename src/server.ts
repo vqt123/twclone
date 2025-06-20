@@ -11,10 +11,12 @@ import {
   PlayerTradedData,
   ShipUpgradeData,
   ShipUpgradeResultData,
+  BuyCargoUpgradeResultData,
   ShipType,
-  TradingPostType
+  TradingPostType,
+  Player
 } from './types';
-import { tradingPosts, shipTypes } from './game-config';
+import { tradingPosts, shipTypes, cargoUpgradeConfig } from './game-config';
 import { generateSectors, generateTradingPosts, executeTrade } from './universe-generator';
 import { updatePlayerEnergy, consumeEnergy } from './energy-system';
 import { createPlayer } from './player-factory';
@@ -31,7 +33,8 @@ const gameState: GameState = {
   sectors: generateSectors(),
   players: {},
   tradingPosts: tradingPosts,
-  shipTypes: shipTypes
+  shipTypes: shipTypes,
+  shipUpgrades: {} // Empty for now
 };
 
 generateTradingPosts(gameState.sectors);
@@ -69,6 +72,17 @@ function findPath(sectors: { [key: number]: any }, startSectorId: number, target
   return null; // No path found
 }
 
+// Cargo upgrade utility functions
+function calculateCargoUpgradeCost(currentUpgrades: number): number {
+  return Math.round(cargoUpgradeConfig.baseCost * Math.pow(cargoUpgradeConfig.costMultiplier, currentUpgrades));
+}
+
+function calculatePlayerCargoCapacity(player: Player): number {
+  const baseCapacity = shipTypes[player.ship].cargoCapacity;
+  const upgradeCapacity = player.cargoUpgrades * cargoUpgradeConfig.capacityIncrease;
+  return baseCapacity + upgradeCapacity;
+}
+
 io.on('connection', (socket) => {
   console.log('Player connected:', socket.id);
   
@@ -81,7 +95,8 @@ io.on('connection', (socket) => {
     player: player,
     sectors: gameState.sectors,
     tradingPosts: gameState.tradingPosts,
-    shipTypes: gameState.shipTypes
+    shipTypes: gameState.shipTypes,
+    shipUpgrades: gameState.shipUpgrades
   };
   
   socket.emit('playerJoined', joinData);
@@ -170,9 +185,11 @@ io.on('connection', (socket) => {
     // Execute trade and get profit
     const baseProfit = executeTrade(tradingPost);
     
-    // Apply ship multiplier
+    // Apply ship multiplier and cargo capacity bonus
     const shipInfo = gameState.shipTypes[player.ship];
-    const finalProfit = Math.round(baseProfit * shipInfo.tradeMultiplier);
+    const cargoCapacity = calculatePlayerCargoCapacity(player);
+    const cargoMultiplier = 1 + (cargoCapacity - shipInfo.cargoCapacity) * 0.02; // 2% per extra cargo unit
+    const finalProfit = Math.round(baseProfit * shipInfo.tradeMultiplier * cargoMultiplier);
     
     player.credits += finalProfit;
     
@@ -239,6 +256,50 @@ io.on('connection', (socket) => {
     } as PlayerUpdateData);
     
     console.log(`Player ${player.name} upgraded to ${newShipInfo.name}`);
+  });
+
+  socket.on('buyCargoUpgrade', () => {
+    const player = Object.values(gameState.players).find(p => p.socketId === socket.id)!;
+    const currentSector = gameState.sectors[player.currentSector];
+    
+    // Check if player is at a StarPort or Commercial Hub
+    if (!currentSector.tradingPost || 
+        (currentSector.tradingPost.type !== TradingPostType.STARPORT && 
+         currentSector.tradingPost.type !== TradingPostType.COMMERCIAL)) {
+      socket.emit('error', 'Cargo upgrades only available at StarPorts and Commercial Hubs');
+      return;
+    }
+    
+    const shipInfo = shipTypes[player.ship];
+    
+    // Check if player has reached max upgrades for their ship
+    if (player.cargoUpgrades >= shipInfo.maxCargoUpgrades) {
+      socket.emit('error', `Maximum cargo upgrades reached for ${shipInfo.name} (${shipInfo.maxCargoUpgrades})`);
+      return;
+    }
+    
+    const upgradeCost = calculateCargoUpgradeCost(player.cargoUpgrades);
+    
+    // Check if player can afford the upgrade
+    if (player.credits < upgradeCost) {
+      socket.emit('error', `Insufficient credits for cargo upgrade (${upgradeCost} required)`);
+      return;
+    }
+    
+    // Perform the upgrade
+    player.credits -= upgradeCost;
+    player.cargoUpgrades += 1;
+    const newCargoCapacity = calculatePlayerCargoCapacity(player);
+    
+    socket.emit('cargoUpgradeResult', {
+      success: true,
+      cost: upgradeCost,
+      newCargoCapacity: newCargoCapacity,
+      player: player,
+      message: `Cargo hold upgraded! New capacity: ${newCargoCapacity}`
+    } as BuyCargoUpgradeResultData);
+    
+    console.log(`Player ${player.name} bought cargo upgrade ${player.cargoUpgrades} for ${upgradeCost} credits`);
   });
   
   socket.on('disconnect', () => {

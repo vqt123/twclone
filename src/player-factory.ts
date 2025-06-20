@@ -12,6 +12,8 @@ export function createPlayer(socketId: string): Player {
     currentSector: 1,
     credits: 1000,
     ship: ShipType.SCOUT,
+    shipUpgrades: [],
+    cargoUpgrades: 0,
     energy: energyConfig.maxEnergy,
     lastEnergyUpdate: Date.now()
   };

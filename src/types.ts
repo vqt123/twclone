@@ -37,10 +37,20 @@ export interface TradingPostInfo {
 
 export interface ShipInfo {
   name: string;
-  cargoCapacity: number; // Keep for future use, but now affects trade multiplier
+  cargoCapacity: number; // Base cargo capacity
   energyEfficiency: number;
   tradeMultiplier: number; // New: affects trade profits
   price: number;
+  maxCargoUpgrades: number; // Maximum number of cargo hold upgrades
+}
+
+export interface ShipUpgrade {
+  id: string;
+  name: string;
+  description: string;
+  tradeMultiplierBonus: number; // Additional multiplier bonus
+  price: number;
+  requiredShip: ShipType;
 }
 
 // Removed PortInfo - replaced with TradingPostInfo
@@ -63,6 +73,8 @@ export interface Player {
   currentSector: number;
   credits: number;
   ship: ShipType;
+  shipUpgrades: string[]; // Array of upgrade IDs the player owns
+  cargoUpgrades: number; // Number of cargo hold upgrades purchased
   energy: number;
   lastEnergyUpdate: number;
 }
@@ -91,6 +103,7 @@ export interface GameState {
   players: { [key: string]: Player };
   tradingPosts: { [key in TradingPostType]: TradingPostInfo };
   shipTypes: { [key in ShipType]: ShipInfo };
+  shipUpgrades: { [key: string]: ShipUpgrade };
 }
 
 // Socket event interfaces
@@ -100,6 +113,7 @@ export interface PlayerJoinedData {
   sectors: { [key: number]: Sector };
   tradingPosts: { [key in TradingPostType]: TradingPostInfo };
   shipTypes: { [key in ShipType]: ShipInfo };
+  shipUpgrades: { [key: string]: ShipUpgrade };
 }
 
 export interface PlayerUpdateData {
@@ -128,6 +142,25 @@ export interface ShipUpgradeData {
 export interface ShipUpgradeResultData {
   success: boolean;
   newShip: ShipType;
+  player: Player;
+  message?: string;
+}
+
+export interface BuyUpgradeData {
+  upgradeId: string;
+}
+
+export interface BuyUpgradeResultData {
+  success: boolean;
+  upgrade: ShipUpgrade;
+  player: Player;
+  message?: string;
+}
+
+export interface BuyCargoUpgradeResultData {
+  success: boolean;
+  cost: number;
+  newCargoCapacity: number;
   player: Player;
   message?: string;
 }

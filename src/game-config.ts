@@ -34,21 +34,24 @@ export const shipTypes: { [key in ShipType]: ShipInfo } = {
     cargoCapacity: 10, 
     energyEfficiency: 0.8,
     tradeMultiplier: 1.0, // Base trading efficiency
-    price: 0 
+    price: 0,
+    maxCargoUpgrades: 5
   },
   [ShipType.TRADER]: { 
     name: 'Trader Vessel', 
     cargoCapacity: 30, 
     energyEfficiency: 1.0,
     tradeMultiplier: 1.5, // 50% more profit from trading
-    price: 5000 
+    price: 5000,
+    maxCargoUpgrades: 8
   },
   [ShipType.FREIGHTER]: { 
     name: 'Heavy Freighter', 
     cargoCapacity: 50, 
     energyEfficiency: 1.5,
     tradeMultiplier: 2.0, // 100% more profit from trading
-    price: 15000 
+    price: 15000,
+    maxCargoUpgrades: 10
   }
 };
 
@@ -67,4 +70,11 @@ export const tradeConfig = {
   efficiencyDecay: 0.85, // Each trade reduces efficiency to 85% of previous (slower decay)
   regenTimeHours: 24, // Time to fully regenerate from 0% to 100%
   minEfficiency: 0.05, // Minimum efficiency (5%)
+};
+
+// Cargo upgrade configuration
+export const cargoUpgradeConfig = {
+  baseCost: 500, // Base cost for first upgrade
+  costMultiplier: 1.8, // Each upgrade costs 80% more than the last
+  capacityIncrease: 5, // Each upgrade adds 5 cargo capacity
 };

@@ -10,44 +10,69 @@
             background-color: #000;
             color: #00ff00;
             margin: 0;
-            padding: 20px;
+            padding: 10px;
+            height: 100vh;
+            overflow: hidden;
+            box-sizing: border-box;
         }
         
         .container {
-            max-width: 1200px;
-            margin: 0 auto;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
         }
         
         .header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 10px;
+            flex-shrink: 0;
+        }
+        
+        .header h1 {
+            margin: 0 0 5px 0;
+            font-size: 24px;
+        }
+        
+        .header p {
+            margin: 0;
+            font-size: 14px;
         }
         
         .game-area {
             display: flex;
-            gap: 30px;
+            gap: 15px;
+            flex: 1;
+            overflow: hidden;
         }
         
         .sector-map {
             flex: 2;
             border: 2px solid #00ff00;
-            padding: 20px;
-            min-height: 400px;
+            padding: 10px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
         }
         
         .sector-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
+            gap: 5px;
+            margin-bottom: 10px;
+            flex-shrink: 0;
         }
         
         .sector {
             border: 1px solid #006600;
-            padding: 10px;
+            padding: 5px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
+            font-size: 10px;
+            min-height: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
         
         .sector:hover {
@@ -90,7 +115,10 @@
         .player-info {
             flex: 1;
             border: 2px solid #00ff00;
-            padding: 20px;
+            padding: 10px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
         }
         
         .status {
@@ -126,12 +154,13 @@
         }
         
         .log {
-            margin-top: 20px;
+            margin-top: 10px;
             border: 1px solid #006600;
-            padding: 10px;
-            height: 150px;
+            padding: 5px;
+            height: 100px;
             overflow-y: auto;
-            font-size: 12px;
+            font-size: 10px;
+            flex-shrink: 0;
         }
         
         .log-entry {
@@ -370,6 +399,14 @@
                     <h4>Ship Upgrade Center</h4>
                     <div id="shipUpgradeControls" class="ship-upgrade-controls"></div>
                 </div>
+
+                <div id="cargoUpgrade" class="ship-upgrade" style="display: none;">
+                    <h4>Cargo Hold Expansion</h4>
+                    <div id="cargoUpgradeInfo" style="margin-bottom: 10px; font-size: 11px; color: #aaa;"></div>
+                    <div id="cargoUpgradeControls">
+                        <button id="buyCargoUpgradeButton" class="upgrade-button" onclick="buyCargoUpgrade()">Upgrade Cargo Hold</button>
+                    </div>
+                </div>
                 
                 <div class="players-list">
                     <h4>Players in Sector:</h4>
@@ -473,10 +510,10 @@
                             }
                             
                             const playerCount = sector.players ? sector.players.length : 0;
-                            const tradingPostInfo = sector.tradingPost ? `<br><small style="color: #ffaa00;">Trading Post</small>` : '';
+                            const tradingPostInfo = sector.tradingPost ? `<br><small style="color: #ffaa00;">${sector.tradingPost.name}</small>` : '';
                             sectorDiv.innerHTML = `
                                 <strong>${sectorId}</strong><br>
-                                <small>Players: ${playerCount}</small>
+                                <small>P: ${playerCount}</small>
                                 ${tradingPostInfo}
                             `;
                             
@@ -576,6 +613,9 @@
             // Update ship upgrade info
             updateShipUpgradeInfo(currentSector);
             
+            // Update cargo upgrade info
+            updateCargoUpgradeInfo(currentSector);
+            
             if (currentSector && currentSector.players && currentSector.players.length > 0) {
                 playersDiv.innerHTML = '';
                 currentSector.players.forEach(playerId => {
@@ -660,6 +700,51 @@
 
         function upgradeShip(shipType) {
             socket.emit('upgradeShip', { shipType: shipType });
+        }
+
+        function updateCargoUpgradeInfo(sector) {
+            const cargoUpgrade = document.getElementById('cargoUpgrade');
+            const cargoUpgradeInfo = document.getElementById('cargoUpgradeInfo');
+            const buyCargoUpgradeButton = document.getElementById('buyCargoUpgradeButton');
+            
+            // Show cargo upgrades at StarPorts and Commercial Hubs
+            if (sector && sector.tradingPost && 
+                (sector.tradingPost.type === 'starport' || sector.tradingPost.type === 'commercial')) {
+                cargoUpgrade.style.display = 'block';
+                
+                if (gameState.player && gameState.shipTypes) {
+                    const shipInfo = gameState.shipTypes[gameState.player.ship];
+                    const currentUpgrades = gameState.player.cargoUpgrades || 0;
+                    const baseCapacity = shipInfo.cargoCapacity;
+                    const currentCapacity = baseCapacity + (currentUpgrades * 5); // 5 per upgrade
+                    const maxUpgrades = shipInfo.maxCargoUpgrades;
+                    
+                    cargoUpgradeInfo.innerHTML = `
+                        Current Capacity: ${currentCapacity}<br>
+                        Upgrades: ${currentUpgrades}/${maxUpgrades}<br>
+                        Each upgrade adds +5 capacity and +2% trade profit
+                    `;
+                    
+                    if (currentUpgrades >= maxUpgrades) {
+                        buyCargoUpgradeButton.disabled = true;
+                        buyCargoUpgradeButton.textContent = 'Maximum Upgrades Reached';
+                    } else {
+                        const upgradeCost = Math.round(500 * Math.pow(1.8, currentUpgrades));
+                        const canAfford = gameState.player.credits >= upgradeCost;
+                        
+                        buyCargoUpgradeButton.disabled = !canAfford;
+                        buyCargoUpgradeButton.textContent = canAfford 
+                            ? `Upgrade for ${upgradeCost} credits` 
+                            : `Need ${upgradeCost} credits`;
+                    }
+                }
+            } else {
+                cargoUpgrade.style.display = 'none';
+            }
+        }
+
+        function buyCargoUpgrade() {
+            socket.emit('buyCargoUpgrade');
         }
 
         // Pathfinding system
@@ -807,6 +892,14 @@
         });
 
         socket.on('shipUpgradeResult', (data) => {
+            if (data.success) {
+                gameState.player = data.player;
+                updatePlayerInfo();
+                log(data.message);
+            }
+        });
+
+        socket.on('cargoUpgradeResult', (data) => {
             if (data.success) {
                 gameState.player = data.player;
                 updatePlayerInfo();
